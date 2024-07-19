@@ -16,11 +16,6 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public Question saveQuestion(Question question) {
-        return questionRepository.save(question);
-    }
-
-    @Override
     public List<Question> getAllQuestions() {
         return questionRepository.findAll();
     }
