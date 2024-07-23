@@ -22,4 +22,7 @@ public class Episode {
 
     @OneToMany(mappedBy = "episode", cascade = CascadeType.ALL)
     private List<Question> questions;
+
+    @OneToMany(mappedBy = "episode", cascade = CascadeType.ALL)
+    private List<GameSession> gameSessions;
 }

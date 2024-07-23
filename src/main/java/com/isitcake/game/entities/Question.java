@@ -17,8 +17,9 @@ public class Question {
     private int questionNumber;
     private int numberChoices;
     private int correctChoice;
-    private long episodeTimestamp;
-    private int durationSeconds;
+    private Long questionStartTime;
+    private Long questionEndTime;
+    private Long durationMillis;
 
     @ManyToOne
     @JoinColumn(name = "episode_id")
