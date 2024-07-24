@@ -1,9 +1,8 @@
 package com.isitcake.game.services.impl;
 
-import com.isitcake.game.entities.GameSession;
-import com.isitcake.game.entities.Episode;
-import com.isitcake.game.repositories.EpisodeRepository;
+import com.isitcake.game.entities.*;
 import com.isitcake.game.repositories.GameSessionRepository;
+import com.isitcake.game.repositories.EpisodeRepository;
 import com.isitcake.game.services.GameSessionService;
 import com.isitcake.game.services.GameSessionWebSocketService;
 import com.isitcake.game.util.SessionIdGenerator;
@@ -11,8 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class GameSessionServiceImpl implements GameSessionService {
@@ -32,7 +30,7 @@ public class GameSessionServiceImpl implements GameSessionService {
     }
 
     @Override
-    public GameSession createGameSession(int season, int episodeNumber) {
+    public GameSession createGameSession(int season, int episodeNumber, String playerName) {
         Optional<Episode> episodeOptional = episodeRepository.findBySeasonAndEpisodeNumber(season, episodeNumber);
         if (episodeOptional.isPresent()) {
             Episode episode = episodeOptional.get();
@@ -43,14 +41,30 @@ public class GameSessionServiceImpl implements GameSessionService {
             gameSession.setEpisodeStartTime(new Timestamp(System.currentTimeMillis()));
             gameSession.setPausedStartTime(null);
             gameSession.setIsPaused(false);
-            gameSession.setIsActive(true); // Mark as active
+            gameSession.setIsActive(true);
             gameSession.setEpisode(episode);
+            gameSession.setPlayers(new ArrayList<>()); // Initialize player list
+            addPlayerToSession(gameSession, playerName, true); // Add the player creating the game as the host
+            gameSession.setEventTimeline(initializeEventTimeline(episode.getQuestions()));
+            gameSession.setCurrentEvent(gameSession.getEventTimeline().getFirst());
             gameSession = gameSessionRepository.save(gameSession);
             gameSessionWebSocketService.broadcastGameState(gameSession);
             return gameSession;
         } else {
             throw new RuntimeException("Episode not found");
         }
+    }
+
+    private LinkedList<Object> initializeEventTimeline(List<Question> questions) {
+        LinkedList<Object> timeline = new LinkedList<>();
+        for (Question question : questions) {
+            timeline.add(question);
+            // Add a result event after each question
+            timeline.add(new Event("result", question.getQuestionEndTime() + 2000L)); // 2 seconds after question ends
+            // Add a waiting period event after each result
+            timeline.add(new Event("waiting_period", question.getQuestionEndTime() + 2000L + 120000L)); // 2 minutes after result
+        }
+        return timeline;
     }
 
     @Override
@@ -74,7 +88,10 @@ public class GameSessionServiceImpl implements GameSessionService {
     }
 
     @Override
-    public GameSession pauseGameSession(String sessionId) {
+    public GameSession pauseGameSession(String sessionId, String playerName) {
+        if (!isHost(sessionId, playerName)) {
+            throw new RuntimeException("Only the host can pause the game session");
+        }
         Optional<GameSession> gameSessionOptional = gameSessionRepository.findBySessionId(sessionId);
         if (gameSessionOptional.isPresent()) {
             GameSession gameSession = gameSessionOptional.get();
@@ -89,7 +106,10 @@ public class GameSessionServiceImpl implements GameSessionService {
     }
 
     @Override
-    public GameSession resumeGameSession(String sessionId) {
+    public GameSession resumeGameSession(String sessionId, String playerName) {
+        if (!isHost(sessionId, playerName)) {
+            throw new RuntimeException("Only the host can resume the game session");
+        }
         Optional<GameSession> gameSessionOptional = gameSessionRepository.findBySessionId(sessionId);
         if (gameSessionOptional.isPresent()) {
             GameSession gameSession = gameSessionOptional.get();
@@ -110,7 +130,10 @@ public class GameSessionServiceImpl implements GameSessionService {
     }
 
     @Override
-    public GameSession updateEpisodeStartTime(String sessionId, Timestamp newEpisodeStartTime) {
+    public GameSession updateEpisodeStartTime(String sessionId, String playerName, Timestamp newEpisodeStartTime) {
+        if (!isHost(sessionId, playerName)) {
+            throw new RuntimeException("Only the host can update the episode start time");
+        }
         Optional<GameSession> gameSessionOptional = gameSessionRepository.findBySessionId(sessionId);
         if (gameSessionOptional.isPresent()) {
             GameSession gameSession = gameSessionOptional.get();
@@ -134,10 +157,80 @@ public class GameSessionServiceImpl implements GameSessionService {
     }
 
     private void updateGameStateBasedOnTime(GameSession session, long elapsedTime) {
-        if (session.getCurrentState().equals("initial") && elapsedTime > 5000) { // 5 seconds for demo
-            session.setCurrentState("question_1");
+        Object currentEvent = session.getCurrentEvent();
+        if (currentEvent instanceof Question) {
+            Question currentQuestion = (Question) currentEvent;
+            if (elapsedTime >= currentQuestion.getQuestionEndTime()) {
+                // Move to the next event
+                session.setCurrentEvent(session.getEventTimeline().pollFirst());
+                session.setCurrentState("result");
+            }
+        } else if (currentEvent instanceof Event) {
+            Event event = (Event) currentEvent;
+            if (event.getType().equals("result") && elapsedTime >= event.getEventTime()) {
+                session.setCurrentEvent(session.getEventTimeline().pollFirst());
+                session.setCurrentState("waiting_period");
+            } else if (event.getType().equals("waiting_period") && elapsedTime >= event.getEventTime()) {
+                session.setCurrentEvent(session.getEventTimeline().pollFirst());
+                session.setCurrentState("question_" + ((Question) session.getCurrentEvent()).getQuestionNumber());
+            }
         }
-        // Add more logic to transition between states based on elapsed time
         gameSessionRepository.save(session);
+    }
+
+    @Override
+    public GameSession addPlayer(String sessionId, String playerName) {
+        Optional<GameSession> gameSessionOptional = gameSessionRepository.findBySessionId(sessionId);
+        if (gameSessionOptional.isPresent()) {
+            GameSession gameSession = gameSessionOptional.get();
+            addPlayerToSession(gameSession, playerName, false);
+            gameSession = gameSessionRepository.save(gameSession);
+            gameSessionWebSocketService.broadcastGameState(gameSession);
+            return gameSession;
+        } else {
+            throw new RuntimeException("Game session not found");
+        }
+    }
+
+    private void addPlayerToSession(GameSession gameSession, String playerName, boolean isHost) {
+        Player player = new Player();
+        player.setName(playerName);
+        player.setScore(0);
+        player.setHost(isHost);
+        gameSession.getPlayers().add(player);
+    }
+
+    private boolean isHost(String sessionId, String playerName) {
+        Optional<GameSession> gameSessionOptional = gameSessionRepository.findBySessionId(sessionId);
+        if (gameSessionOptional.isPresent()) {
+            GameSession gameSession = gameSessionOptional.get();
+            return gameSession.getPlayers().stream()
+                    .anyMatch(player -> player.getName().equals(playerName) && player.isHost());
+        }
+        return false;
+    }
+
+    @Override
+    public GameSession recordPlayerAnswer(String sessionId, String playerName, int selectedChoice, long answerTime) {
+        Optional<GameSession> gameSessionOptional = gameSessionRepository.findBySessionId(sessionId);
+        if (gameSessionOptional.isPresent()) {
+            GameSession gameSession = gameSessionOptional.get();
+            Optional<Player> playerOptional = gameSession.getPlayers().stream()
+                    .filter(player -> player.getName().equals(playerName))
+                    .findFirst();
+            if (playerOptional.isPresent()) {
+                Player player = playerOptional.get();
+                player.setSelectedChoice(selectedChoice);
+                player.setAnswerTime(answerTime);
+                // Logic to update player score if needed
+                gameSession = gameSessionRepository.save(gameSession);
+                gameSessionWebSocketService.broadcastGameState(gameSession);
+                return gameSession;
+            } else {
+                throw new RuntimeException("Player not found");
+            }
+        } else {
+            throw new RuntimeException("Game session not found");
+        }
     }
 }

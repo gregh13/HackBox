@@ -3,7 +3,6 @@ package com.isitcake.game.controllers;
 import com.isitcake.game.entities.GameSession;
 import com.isitcake.game.services.GameSessionService;
 import com.isitcake.game.services.GameSessionWebSocketService;
-import com.isitcake.game.repositories.EpisodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,9 +20,6 @@ public class GameSessionController {
     @Autowired
     private GameSessionWebSocketService gameSessionWebSocketService;
 
-    @Autowired
-    private EpisodeRepository episodeRepository;
-
     @GetMapping("/{sessionId}")
     public ResponseEntity<GameSession> getGameSession(@PathVariable String sessionId) {
         Optional<GameSession> gameSession = gameSessionService.findBySessionId(sessionId);
@@ -31,9 +27,25 @@ public class GameSessionController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<GameSession> createGameSession(@RequestParam int season, @RequestParam int episodeNumber) {
+    public ResponseEntity<GameSession> createGameSession(
+            @RequestParam int season,
+            @RequestParam int episodeNumber,
+            @RequestParam String playerName) {
         try {
-            GameSession gameSession = gameSessionService.createGameSession(season, episodeNumber);
+            GameSession gameSession = gameSessionService.createGameSession(season, episodeNumber, playerName);
+            gameSessionWebSocketService.broadcastGameState(gameSession);
+            return ResponseEntity.ok(gameSession);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(null);
+        }
+    }
+
+    @PostMapping("/join")
+    public ResponseEntity<GameSession> joinGameSession(
+            @RequestParam String sessionId,
+            @RequestParam String playerName) {
+        try {
+            GameSession gameSession = gameSessionService.addPlayer(sessionId, playerName);
             gameSessionWebSocketService.broadcastGameState(gameSession);
             return ResponseEntity.ok(gameSession);
         } catch (RuntimeException e) {
@@ -53,9 +65,11 @@ public class GameSessionController {
     }
 
     @PostMapping("/{sessionId}/pause")
-    public ResponseEntity<GameSession> pauseGameSession(@PathVariable String sessionId) {
+    public ResponseEntity<GameSession> pauseGameSession(
+            @PathVariable String sessionId,
+            @RequestParam String playerName) {
         try {
-            GameSession gameSession = gameSessionService.pauseGameSession(sessionId);
+            GameSession gameSession = gameSessionService.pauseGameSession(sessionId, playerName);
             gameSessionWebSocketService.broadcastGameState(gameSession);
             return ResponseEntity.ok(gameSession);
         } catch (RuntimeException e) {
@@ -64,9 +78,11 @@ public class GameSessionController {
     }
 
     @PostMapping("/{sessionId}/resume")
-    public ResponseEntity<GameSession> resumeGameSession(@PathVariable String sessionId) {
+    public ResponseEntity<GameSession> resumeGameSession(
+            @PathVariable String sessionId,
+            @RequestParam String playerName) {
         try {
-            GameSession gameSession = gameSessionService.resumeGameSession(sessionId);
+            GameSession gameSession = gameSessionService.resumeGameSession(sessionId, playerName);
             gameSessionWebSocketService.broadcastGameState(gameSession);
             return ResponseEntity.ok(gameSession);
         } catch (RuntimeException e) {
@@ -75,10 +91,13 @@ public class GameSessionController {
     }
 
     @PostMapping("/{sessionId}/update-episode-start")
-    public ResponseEntity<GameSession> updateEpisodeStart(@PathVariable String sessionId, @RequestParam long newEpisodeStart) {
+    public ResponseEntity<GameSession> updateEpisodeStart(
+            @PathVariable String sessionId,
+            @RequestParam String playerName,
+            @RequestParam long newEpisodeStart) {
         try {
             Timestamp newEpisodeStartTime = new Timestamp(newEpisodeStart);
-            GameSession gameSession = gameSessionService.updateEpisodeStartTime(sessionId, newEpisodeStartTime);
+            GameSession gameSession = gameSessionService.updateEpisodeStartTime(sessionId, playerName, newEpisodeStartTime);
             gameSessionWebSocketService.broadcastGameState(gameSession);
             return ResponseEntity.ok(gameSession);
         } catch (RuntimeException e) {
@@ -93,6 +112,22 @@ public class GameSessionController {
             return ResponseEntity.notFound().build();
         } else {
             return ResponseEntity.ok(state);
+        }
+    }
+
+    @PostMapping("/{sessionId}/record-answer")
+    public ResponseEntity<GameSession> recordPlayerAnswer(
+            @PathVariable String sessionId,
+            @RequestParam String playerName,
+            @RequestParam int selectedChoice,
+            @RequestParam long answerTime
+    ) {
+        try {
+            GameSession gameSession = gameSessionService.recordPlayerAnswer(sessionId, playerName, selectedChoice, answerTime);
+            gameSessionWebSocketService.broadcastGameState(gameSession);
+            return ResponseEntity.ok(gameSession);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 }
