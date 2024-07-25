@@ -1,13 +1,15 @@
 package com.isitcake.game.controllers;
 
-import com.isitcake.game.entities.GameSession;
-import com.isitcake.game.services.GameSessionService;
-import com.isitcake.game.services.GameSessionWebSocketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.isitcake.game.entities.GameSession;
+import com.isitcake.game.services.GameSessionService;
+import com.isitcake.game.services.GameSessionWebSocketService;
+
 import java.sql.Timestamp;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -28,9 +30,10 @@ public class GameSessionController {
 
     @PostMapping("/create")
     public ResponseEntity<GameSession> createGameSession(
-            @RequestParam int season,
-            @RequestParam int episodeNumber,
-            @RequestParam String playerName) {
+            @RequestBody Map<String, String> payload) {
+        int season = Integer.parseInt(payload.get("season"));
+        int episodeNumber = Integer.parseInt(payload.get("episodeNumber"));
+        String playerName = payload.get("playerName");
         try {
             GameSession gameSession = gameSessionService.createGameSession(season, episodeNumber, playerName);
             gameSessionWebSocketService.broadcastGameState(gameSession);
@@ -42,8 +45,9 @@ public class GameSessionController {
 
     @PostMapping("/join")
     public ResponseEntity<GameSession> joinGameSession(
-            @RequestParam String sessionId,
-            @RequestParam String playerName) {
+            @RequestBody Map<String, String> payload) {
+        String sessionId = payload.get("sessionId");
+        String playerName = payload.get("playerName");
         try {
             GameSession gameSession = gameSessionService.addPlayer(sessionId, playerName);
             gameSessionWebSocketService.broadcastGameState(gameSession);
@@ -54,7 +58,9 @@ public class GameSessionController {
     }
 
     @PostMapping("/{sessionId}/update-state")
-    public ResponseEntity<GameSession> updateGameState(@PathVariable String sessionId, @RequestParam String state) {
+    public ResponseEntity<GameSession> updateGameState(
+            @PathVariable String sessionId, @RequestBody Map<String, String> payload) {
+        String state = payload.get("state");
         try {
             GameSession gameSession = gameSessionService.updateGameState(sessionId, state);
             gameSessionWebSocketService.broadcastGameState(gameSession);
@@ -66,8 +72,8 @@ public class GameSessionController {
 
     @PostMapping("/{sessionId}/pause")
     public ResponseEntity<GameSession> pauseGameSession(
-            @PathVariable String sessionId,
-            @RequestParam String playerName) {
+            @PathVariable String sessionId, @RequestBody Map<String, String> payload) {
+        String playerName = payload.get("playerName");
         try {
             GameSession gameSession = gameSessionService.pauseGameSession(sessionId, playerName);
             gameSessionWebSocketService.broadcastGameState(gameSession);
@@ -79,8 +85,8 @@ public class GameSessionController {
 
     @PostMapping("/{sessionId}/resume")
     public ResponseEntity<GameSession> resumeGameSession(
-            @PathVariable String sessionId,
-            @RequestParam String playerName) {
+            @PathVariable String sessionId, @RequestBody Map<String, String> payload) {
+        String playerName = payload.get("playerName");
         try {
             GameSession gameSession = gameSessionService.resumeGameSession(sessionId, playerName);
             gameSessionWebSocketService.broadcastGameState(gameSession);
@@ -92,9 +98,9 @@ public class GameSessionController {
 
     @PostMapping("/{sessionId}/update-episode-start")
     public ResponseEntity<GameSession> updateEpisodeStart(
-            @PathVariable String sessionId,
-            @RequestParam String playerName,
-            @RequestParam long newEpisodeStart) {
+            @PathVariable String sessionId, @RequestBody Map<String, Object> payload) {
+        String playerName = (String) payload.get("playerName");
+        long newEpisodeStart = ((Number) payload.get("newEpisodeStart")).longValue();
         try {
             Timestamp newEpisodeStartTime = new Timestamp(newEpisodeStart);
             GameSession gameSession = gameSessionService.updateEpisodeStartTime(sessionId, playerName, newEpisodeStartTime);
@@ -118,10 +124,10 @@ public class GameSessionController {
     @PostMapping("/{sessionId}/record-answer")
     public ResponseEntity<GameSession> recordPlayerAnswer(
             @PathVariable String sessionId,
-            @RequestParam String playerName,
-            @RequestParam int selectedChoice,
-            @RequestParam long answerTime
-    ) {
+            @RequestBody Map<String, Object> payload) {
+        String playerName = (String) payload.get("playerName");
+        int selectedChoice = ((Number) payload.get("selectedChoice")).intValue();
+        long answerTime = ((Number) payload.get("answerTime")).longValue();
         try {
             GameSession gameSession = gameSessionService.recordPlayerAnswer(sessionId, playerName, selectedChoice, answerTime);
             gameSessionWebSocketService.broadcastGameState(gameSession);
