@@ -1,17 +1,16 @@
-# Use official OpenJDK image as a base image
+# Use Maven to build the application
+FROM maven:3.8.6-openjdk-17 AS build
+COPY . /usr/src/app
+WORKDIR /usr/src/app
+RUN mvn clean package -DskipTests
+
+# Use OpenJDK as the base image for the application
 FROM openjdk:17-jdk-slim
-
-# Add a volume pointing to /tmp
 VOLUME /tmp
-
-# Expose port 8080 to the outside world
 EXPOSE 8080
 
-# The application's jar file
-ARG JAR_FILE=target/gameSession-0.0.1-SNAPSHOT.jar
+# Copy the built JAR file from the build stage
+COPY --from=build /usr/src/app/target/gameSession-0.0.1-SNAPSHOT.jar app.jar
 
-# Add the application's jar to the container
-ADD ${JAR_FILE} app.jar
-
-# Run the jar file
+# Run the JAR file
 ENTRYPOINT ["java", "-jar", "/app.jar"]
