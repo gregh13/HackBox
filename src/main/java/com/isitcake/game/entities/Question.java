@@ -1,5 +1,6 @@
 package com.isitcake.game.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,5 +24,19 @@ public class Question {
 
     @ManyToOne
     @JoinColumn(name = "episode_id")
+    @JsonBackReference
     private Episode episode;
+
+    @Override
+    public String toString() {
+        return "Question{" +
+                "id=" + id +
+                ", questionNumber=" + questionNumber +
+                ", numberChoices=" + numberChoices +
+                ", correctChoice=" + correctChoice +
+                ", questionStartTime=" + questionStartTime +
+                ", questionEndTime=" + questionEndTime +
+                ", durationMillis=" + durationMillis +
+                '}';
+    }
 }
