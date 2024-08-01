@@ -1,5 +1,7 @@
 package com.isitcake.game.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -22,9 +24,11 @@ public class GameSession {
 
     @ManyToOne
     @JoinColumn(name = "episode_id")
+    @JsonManagedReference
     private Episode episode;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Player> players;
 
     @Transient
@@ -32,4 +36,17 @@ public class GameSession {
 
     @Transient
     private Object currentEvent; // Can be Question or Event
+
+    @Override
+    public String toString() {
+        return "GameSession{" +
+                "id=" + id +
+                ", sessionId='" + sessionId + '\'' +
+                ", currentState='" + currentState + '\'' +
+                ", episodeStartTime=" + episodeStartTime +
+                ", pausedStartTime=" + pausedStartTime +
+                ", isPaused=" + isPaused +
+                ", isActive=" + isActive +
+                '}';
+    }
 }

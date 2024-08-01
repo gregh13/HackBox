@@ -34,11 +34,18 @@ public class GameSessionController {
         int season = Integer.parseInt(payload.get("season"));
         int episodeNumber = Integer.parseInt(payload.get("episodeNumber"));
         String playerName = payload.get("playerName");
+        System.out.println("Season: " + season);
+        System.out.println("Episode: " + episodeNumber);
+        System.out.println("Player: " + playerName);
         try {
             GameSession gameSession = gameSessionService.createGameSession(season, episodeNumber, playerName);
+            System.out.println("Game Session: " + gameSession);
+            System.out.println("Game Session ID: " + gameSession.getSessionId());
+            System.out.println("Game Session Players: " + gameSession.getPlayers());
             gameSessionWebSocketService.broadcastGameState(gameSession);
             return ResponseEntity.ok(gameSession);
         } catch (RuntimeException e) {
+            System.out.println("Exception caught: " + e);
             return ResponseEntity.status(404).body(null);
         }
     }

@@ -3,6 +3,7 @@ package com.isitcake.game.services.impl;
 import com.isitcake.game.entities.*;
 import com.isitcake.game.repositories.GameSessionRepository;
 import com.isitcake.game.repositories.EpisodeRepository;
+import com.isitcake.game.repositories.PlayerRepository;
 import com.isitcake.game.services.GameSessionService;
 import com.isitcake.game.services.GameSessionWebSocketService;
 import com.isitcake.game.util.SessionIdGenerator;
@@ -19,6 +20,9 @@ public class GameSessionServiceImpl implements GameSessionService {
     private GameSessionRepository gameSessionRepository;
 
     @Autowired
+    private PlayerRepository playerRepository;
+
+    @Autowired
     private EpisodeRepository episodeRepository;
 
     @Autowired
@@ -33,23 +37,33 @@ public class GameSessionServiceImpl implements GameSessionService {
     public GameSession createGameSession(int season, int episodeNumber, String playerName) {
         Optional<Episode> episodeOptional = episodeRepository.findBySeasonAndEpisodeNumber(season, episodeNumber);
         if (episodeOptional.isPresent()) {
-            Episode episode = episodeOptional.get();
-            String sessionId = SessionIdGenerator.generateSessionId();
-            GameSession gameSession = new GameSession();
-            gameSession.setSessionId(sessionId);
-            gameSession.setCurrentState("initial");
-            gameSession.setEpisodeStartTime(new Timestamp(System.currentTimeMillis()));
-            gameSession.setPausedStartTime(null);
-            gameSession.setIsPaused(false);
-            gameSession.setIsActive(true);
-            gameSession.setEpisode(episode);
-            gameSession.setPlayers(new ArrayList<>()); // Initialize player list
-            addPlayerToSession(gameSession, playerName, true); // Add the player creating the game as the host
-            gameSession.setEventTimeline(initializeEventTimeline(episode.getQuestions()));
-            gameSession.setCurrentEvent(gameSession.getEventTimeline().getFirst());
-            gameSession = gameSessionRepository.save(gameSession);
-            gameSessionWebSocketService.broadcastGameState(gameSession);
-            return gameSession;
+            try {
+                System.out.println("Episode found: " + episodeOptional.get());
+                Episode episode = episodeOptional.get();
+                String sessionId = SessionIdGenerator.generateSessionId();
+                GameSession gameSession = new GameSession();
+                gameSession.setSessionId(sessionId);
+                gameSession.setCurrentState("initial");
+                gameSession.setEpisodeStartTime(new Timestamp(System.currentTimeMillis()));
+                gameSession.setPausedStartTime(null);
+                gameSession.setIsPaused(true);
+                gameSession.setIsActive(true);
+                gameSession.setEpisode(episode);
+                gameSession.setPlayers(new ArrayList<>()); // Initialize player list
+                gameSession.setEventTimeline(initializeEventTimeline(episode.getQuestions()));
+                gameSession.setCurrentEvent(gameSession.getEventTimeline().getFirst());
+                gameSession = gameSessionRepository.save(gameSession);
+                addPlayerToSession(gameSession, playerName, true); // Add the player creating the game as the host
+                System.out.println("createGameSession Result: " + gameSession);
+                System.out.println("createGameSession Result ID: " + gameSession.getSessionId());
+                System.out.println("createGameSession Result Timeline: " + gameSession.getEventTimeline());
+                System.out.println("createGameSession Result Players: " + gameSession.getPlayers());
+                return gameSession;
+            } catch (RuntimeException e) {
+                System.out.println("Error occurred with game session creation:\n" + e);
+                return null;
+            }
+//            gameSessionWebSocketService.broadcastGameState(gameSession);
         } else {
             throw new RuntimeException("Episode not found");
         }
@@ -184,7 +198,6 @@ public class GameSessionServiceImpl implements GameSessionService {
         if (gameSessionOptional.isPresent()) {
             GameSession gameSession = gameSessionOptional.get();
             addPlayerToSession(gameSession, playerName, false);
-            gameSession = gameSessionRepository.save(gameSession);
             gameSessionWebSocketService.broadcastGameState(gameSession);
             return gameSession;
         } else {
@@ -197,7 +210,10 @@ public class GameSessionServiceImpl implements GameSessionService {
         player.setName(playerName);
         player.setScore(0);
         player.setHost(isHost);
+        player.setGameSession(gameSession);
+        player = playerRepository.save(player);
         gameSession.getPlayers().add(player);
+        gameSessionRepository.save(gameSession);
     }
 
     private boolean isHost(String sessionId, String playerName) {
