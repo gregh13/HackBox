@@ -1,19 +1,58 @@
--- Insert episodes
-INSERT INTO episode (id, season, episode_number, description) VALUES (1, 1, 1, 'Episode 1 of Season 1');
-INSERT INTO episode (id, season, episode_number, description) VALUES (2, 1, 2, 'Episode 2 of Season 1');
-INSERT INTO episode (id, season, episode_number, description) VALUES (3, 2, 1, 'Episode 1 of Season 2');
-
--- Insert questions for Episode 1 of Season 1
-INSERT INTO question (id, question_number, number_choices, correct_choice, episode_timestamp, duration_seconds, episode_id) VALUES (1, 1, 3, 1, 60000, 30, 1);
-INSERT INTO question (id, question_number, number_choices, correct_choice, episode_timestamp, duration_seconds, episode_id) VALUES (2, 2, 3, 2, 120000, 30, 1);
-INSERT INTO question (id, question_number, number_choices, correct_choice, episode_timestamp, duration_seconds, episode_id) VALUES (3, 3, 3, 3, 180000, 30, 1);
-
--- Insert questions for Episode 2 of Season 1
-INSERT INTO question (id, question_number, number_choices, correct_choice, episode_timestamp, duration_seconds, episode_id) VALUES (4, 1, 3, 1, 60000, 30, 2);
-INSERT INTO question (id, question_number, number_choices, correct_choice, episode_timestamp, duration_seconds, episode_id) VALUES (5, 2, 3, 2, 120000, 30, 2);
-INSERT INTO question (id, question_number, number_choices, correct_choice, episode_timestamp, duration_seconds, episode_id) VALUES (6, 3, 3, 3, 180000, 30, 2);
-
--- Insert questions for Episode 1 of Season 2
-INSERT INTO question (id, question_number, number_choices, correct_choice, episode_timestamp, duration_seconds, episode_id) VALUES (7, 1, 3, 1, 60000, 30, 3);
-INSERT INTO question (id, question_number, number_choices, correct_choice, episode_timestamp, duration_seconds, episode_id) VALUES (8, 2, 3, 2, 120000, 30, 3);
-INSERT INTO question (id, question_number, number_choices, correct_choice, episode_timestamp, duration_seconds, episode_id) VALUES (9, 3, 3, 3, 180000, 30, 3);
+---- Clear existing data
+----DELETE FROM player;
+----DELETE FROM question;
+----DELETE FROM game_session;
+----DELETE FROM episode;
+--
+---- Insert episodes
+--INSERT INTO episode (season, episode_number, description) VALUES (1, 1, 'Episode 1 of Season 1 - The beginning of the cake challenge');
+--INSERT INTO episode (season, episode_number, description) VALUES (1, 2, 'Episode 2 of Season 1 - The competition heats up');
+--INSERT INTO episode (season, episode_number, description) VALUES (2, 1, 'Episode 1 of Season 2 - New cakes, new challenges');
+--
+---- Insert questions
+--INSERT INTO question (question_number, number_choices, correct_choice, question_start_time, question_end_time, duration_millis, episode_id)
+--VALUES (1, 3, 2, 60000, 90000, 30000, (SELECT id FROM episode WHERE season = 1 AND episode_number = 1));
+--
+--INSERT INTO question (question_number, number_choices, correct_choice, question_start_time, question_end_time, duration_millis, episode_id)
+--VALUES (2, 4, 1, 120000, 150000, 30000, (SELECT id FROM episode WHERE season = 1 AND episode_number = 1));
+--
+--INSERT INTO question (question_number, number_choices, correct_choice, question_start_time, question_end_time, duration_millis, episode_id)
+--VALUES (3, 3, 3, 180000, 210000, 30000, (SELECT id FROM episode WHERE season = 1 AND episode_number = 1));
+--
+--INSERT INTO question (question_number, number_choices, correct_choice, question_start_time, question_end_time, duration_millis, episode_id)
+--VALUES (1, 3, 2, 60000, 90000, 30000, (SELECT id FROM episode WHERE season = 1 AND episode_number = 2));
+--
+--INSERT INTO question (question_number, number_choices, correct_choice, question_start_time, question_end_time, duration_millis, episode_id)
+--VALUES (2, 4, 1, 120000, 150000, 30000, (SELECT id FROM episode WHERE season = 1 AND episode_number = 2));
+--
+--INSERT INTO question (question_number, number_choices, correct_choice, question_start_time, question_end_time, duration_millis, episode_id)
+--VALUES (3, 3, 3, 180000, 210000, 30000, (SELECT id FROM episode WHERE season = 1 AND episode_number = 2));
+--
+--INSERT INTO question (question_number, number_choices, correct_choice, question_start_time, question_end_time, duration_millis, episode_id)
+--VALUES (1, 3, 2, 60000, 90000, 30000, (SELECT id FROM episode WHERE season = 2 AND episode_number = 1));
+--
+--INSERT INTO question (question_number, number_choices, correct_choice, question_start_time, question_end_time, duration_millis, episode_id)
+--VALUES (2, 4, 1, 120000, 150000, 30000, (SELECT id FROM episode WHERE season = 2 AND episode_number = 1));
+--
+--INSERT INTO question (question_number, number_choices, correct_choice, question_start_time, question_end_time, duration_millis, episode_id)
+--VALUES (3, 3, 3, 180000, 210000, 30000, (SELECT id FROM episode WHERE season = 2 AND episode_number = 1));
+--
+---- Insert game sessions
+--INSERT INTO game_session (session_id, current_state, episode_start_time, paused_start_time, is_paused, is_active, episode_id)
+--VALUES ('A3J0', 'WAITING', '2023-07-25 00:00:00', NULL, FALSE, TRUE, (SELECT id FROM episode WHERE season = 1 AND episode_number = 1));
+--
+--INSERT INTO game_session (session_id, current_state, episode_start_time, paused_start_time, is_paused, is_active, episode_id)
+--VALUES ('B4K1', 'IN_PROGRESS', '2023-07-25 00:00:00', NULL, FALSE, TRUE, (SELECT id FROM episode WHERE season = 1 AND episode_number = 2));
+--
+---- Insert players
+--INSERT INTO player (name, score, answer_time, selected_choice, is_host, game_session_id)
+--VALUES ('Player1', 0, 0, 0, TRUE, (SELECT id FROM game_session WHERE session_id = 'A3J0'));
+--
+--INSERT INTO player (name, score, answer_time, selected_choice, is_host, game_session_id)
+--VALUES ('Player2', 0, 0, 0, FALSE, (SELECT id FROM game_session WHERE session_id = 'A3J0'));
+--
+--INSERT INTO player (name, score, answer_time, selected_choice, is_host, game_session_id)
+--VALUES ('Player3', 0, 0, 0, TRUE, (SELECT id FROM game_session WHERE session_id = 'B4K1'));
+--
+--INSERT INTO player (name, score, answer_time, selected_choice, is_host, game_session_id)
+--VALUES ('Player4', 0, 0, 0, FALSE, (SELECT id FROM game_session WHERE session_id = 'B4K1'));
