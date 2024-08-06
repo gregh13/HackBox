@@ -7,8 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PlayerRepository extends JpaRepository<Player, Long> {
-    List<Player> findByGameSessionId(int gameSessionId);
-    Optional<Player> findByName(String name);
+    Optional<Player> findByNameAndSessionId(String name, String sessionId);
 
-//    Optional<Player> findById(Long id);
+    List<Player> findAllBySessionId(String sessionId);
 }
