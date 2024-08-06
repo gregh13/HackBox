@@ -49,7 +49,7 @@ public class WebSocketController {
     public WebSocketMessage<SetupQuestionResponsePayload> handleSetupQuestion(SetupQuestionAction setupQuestionAction) throws Exception {
         SetupQuestionActionPayload requestPayload = setupQuestionAction.getPayload();
         System.out.println("Setup Question Payload: " + requestPayload);
-        if (requestPayload.questionType() == null || requestPayload.timer() == null || (requestPayload.questionType() == QuestionType.CHOICE && requestPayload.choices() == null) {
+        if (requestPayload.questionType() == null || requestPayload.timer() == null || (requestPayload.questionType() == QuestionType.CHOICE && requestPayload.choices() == null)) {
             // TODO: add exceptions
             System.out.println("Request Payload is missing required values");
             return null;
