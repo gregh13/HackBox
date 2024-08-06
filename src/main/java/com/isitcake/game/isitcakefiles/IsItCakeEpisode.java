@@ -1,4 +1,4 @@
-package com.isitcake.game.entities;
+package com.isitcake.game.isitcakefiles;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -14,7 +14,7 @@ import java.util.List;
 
 @Entity
 @Data
-public class Episode {
+public class IsItCakeEpisode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,11 +24,11 @@ public class Episode {
 
     @OneToMany(mappedBy = "episode", cascade = CascadeType.ALL)
     @JsonManagedReference
-    private List<Question> questions;
+    private List<IsItCakeQuestion> isItCakeQuestions;
 
     @OneToMany(mappedBy = "episode", cascade = CascadeType.ALL)
     @JsonBackReference
-    private List<GameSession> gameSessions;
+    private List<IsItCakeGameSession> isItCakeGameSessions;
 
     @Override
     public String toString() {

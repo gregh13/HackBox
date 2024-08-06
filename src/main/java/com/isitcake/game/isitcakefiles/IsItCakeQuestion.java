@@ -1,4 +1,4 @@
-package com.isitcake.game.entities;
+package com.isitcake.game.isitcakefiles;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Entity;
@@ -11,7 +11,7 @@ import lombok.Data;
 
 @Entity
 @Data
-public class Question {
+public class IsItCakeQuestion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,7 +25,7 @@ public class Question {
     @ManyToOne
     @JoinColumn(name = "episode_id")
     @JsonBackReference
-    private Episode episode;
+    private IsItCakeEpisode isItCakeEpisode;
 
     @Override
     public String toString() {

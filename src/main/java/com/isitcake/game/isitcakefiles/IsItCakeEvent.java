@@ -1,13 +1,13 @@
-package com.isitcake.game.entities;
+package com.isitcake.game.isitcakefiles;
 
 import lombok.Data;
 
 @Data
-public class Event {
+public class IsItCakeEvent {
     private String type;
     private long eventTime;
 
-    public Event(String type, long eventTime) {
+    public IsItCakeEvent(String type, long eventTime) {
         this.type = type;
         this.eventTime = eventTime;
     }

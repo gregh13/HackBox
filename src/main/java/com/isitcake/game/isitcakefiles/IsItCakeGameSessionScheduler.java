@@ -1,6 +1,5 @@
-package com.isitcake.game.scheduler;
+package com.isitcake.game.isitcakefiles;
 
-import com.isitcake.game.services.GameSessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,10 +10,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class GameSessionScheduler {
+public class IsItCakeGameSessionScheduler {
 
     @Autowired
-    private GameSessionService gameSessionService;
+    private IsItCakeGameSessionService isItCakeGameSessionService;
 
     private ScheduledExecutorService scheduler;
 
@@ -30,6 +29,6 @@ public class GameSessionScheduler {
     }
 
     private void updateGameSessions() {
-        gameSessionService.updateAllGameSessions();
+        isItCakeGameSessionService.updateAllGameSessions();
     }
 }
