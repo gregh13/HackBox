@@ -1,12 +1,11 @@
 package com.isitcake.game.entities;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.isitcake.game.enums.StateType;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.sql.Timestamp;
-import java.util.LinkedList;
 import java.util.List;
 
 @Entity
@@ -14,39 +13,26 @@ import java.util.List;
 public class GameSession {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String sessionId;
-    private String currentState;
-    private Timestamp episodeStartTime;
-    private Timestamp pausedStartTime;
-    private Boolean isPaused;
-    private Boolean isActive;
+    Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "episode_id")
-    @JsonManagedReference
-    private Episode episode;
+    private String sessionId;
+    private StateType gameState;
+    private Boolean active;
+    private Timestamp dateCreated;
+
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private List<Player> players;
-
-    @Transient
-    private LinkedList<Object> eventTimeline; // Contains both questions and events
-
-    @Transient
-    private Object currentEvent; // Can be Question or Event
+    List<Player> players;
 
     @Override
     public String toString() {
-        return "GameSession{" +
+        return "GameSession{ " +
                 "id=" + id +
-                ", sessionId='" + sessionId + '\'' +
-                ", currentState='" + currentState + '\'' +
-                ", episodeStartTime=" + episodeStartTime +
-                ", pausedStartTime=" + pausedStartTime +
-                ", isPaused=" + isPaused +
-                ", isActive=" + isActive +
-                '}';
+                " | sessionId=" + sessionId +
+                " | gameState=" + gameState +
+                " | active=" + active +
+                " | players=" + players +
+                " }";
     }
 }
