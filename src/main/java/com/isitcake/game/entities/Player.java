@@ -1,28 +1,39 @@
 package com.isitcake.game.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
 @Data
 public class Player {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private int score;
-    private long answerTime; // Time taken to answer the question
-    private int selectedChoice; // Player's selected choice for the current question
-    private boolean isHost; // Indicates if the player is the host
+    private String sessionId;
+    private Boolean sessionHost = false;
+    private Integer score = 0;
+    private String choice = "";
+    private Double timeTaken = 0.0;
 
     @ManyToOne
     @JoinColumn(name = "game_session_id")
     @JsonBackReference
     private GameSession gameSession;
+
+    @Override
+    public String toString() {
+        return "Player{ " +
+                "id=" + id +
+                " | name=" + name +
+                " | sessionId=" + sessionId +
+                " | sessionHost=" + sessionHost +
+                " | score=" + score +
+                " | choice=" + choice +
+                " | timeTaken=" + timeTaken +
+                " | gameSession=" + gameSession +
+                " }";
+    }
 }
