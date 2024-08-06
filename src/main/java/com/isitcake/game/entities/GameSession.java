@@ -16,6 +16,8 @@ public class GameSession {
     Long id;
 
     private String sessionId;
+
+    @Enumerated(EnumType.STRING)
     private StateType gameState;
     private Boolean active;
     private Timestamp dateCreated;
