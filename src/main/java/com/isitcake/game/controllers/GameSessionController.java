@@ -24,7 +24,8 @@ public class GameSessionController {
             }
             return ResponseEntity.ok(gameSession);
         } catch (RuntimeException e) {
-            System.out.println("Retrieve game error: " + e);
+            System.out.println("\nRetrieve game error: " + e + "\n");
+            e.printStackTrace();
             return ResponseEntity.status(404).body(null);
         }
     }
@@ -42,7 +43,8 @@ public class GameSessionController {
             return ResponseEntity.ok(gameSession);
 
         } catch (RuntimeException e){
-            System.out.println("Create game error: " + e);
+            System.out.println("\nCreate game error: " + e + "\n");
+            e.printStackTrace();
             return ResponseEntity.status(404).body(null);
         }
     }
@@ -61,7 +63,8 @@ public class GameSessionController {
             return ResponseEntity.ok(gameSession);
 
         } catch (RuntimeException e) {
-            System.out.println("Join game error: " + e);
+            System.out.println("\nJoin game error: " + e + "\n");
+            e.printStackTrace();
             return ResponseEntity.status(404).body(null);
         }
 
