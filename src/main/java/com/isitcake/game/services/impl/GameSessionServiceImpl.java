@@ -60,7 +60,9 @@ public class GameSessionServiceImpl implements GameSessionService {
 
         // Create the host player and add to GameSession players
         Player playerOne = playerService.createPlayer(playerName, gameSession, true);
-        gameSession.setPlayers(List.of(playerOne));
+        List<Player> players = gameSession.getPlayers();
+        players.add(playerOne);
+        gameSession.setPlayers(players);
         return gameSessionRepository.saveAndFlush(gameSession);
     }
 
