@@ -2,17 +2,23 @@ package com.isitcake.game.services.impl;
 
 import com.isitcake.game.entities.GameSession;
 import com.isitcake.game.entities.Player;
+import com.isitcake.game.entities.dtos.PlayerDto;
+import com.isitcake.game.mappers.PlayerMapper;
 import com.isitcake.game.repositories.PlayerRepository;
 import com.isitcake.game.services.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
     @Autowired
     PlayerRepository playerRepository;
+
+    PlayerMapper playerMapper;
 
     @Override
     public Player createPlayer(String playerName, GameSession gameSession, Boolean isHost) {
@@ -49,5 +55,21 @@ public class PlayerServiceImpl implements PlayerService {
         player.setChoice(choice);
         player.setTimeTaken(timeTaken);
         return playerRepository.saveAndFlush(player);
+    }
+
+    @Override
+    public PlayerDto getPlayerDto(Player player) {
+        if (player == null) {
+            return null;
+        }
+        return playerMapper.entityToDto(player);
+    }
+
+    @Override
+    public List<PlayerDto> getPlayerDtos(List<Player> players) {
+        if (players == null) {
+            players = new ArrayList<Player>();
+        }
+        return playerMapper.entitiesToDtos(players);
     }
 }
