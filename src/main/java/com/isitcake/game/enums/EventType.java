@@ -1,10 +1,13 @@
 package com.isitcake.game.enums;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.isitcake.game.util.EventTypeDeserializer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
+@JsonDeserialize(using = EventTypeDeserializer.class)
 public enum EventType {
     SUBMIT_ANSWER("submitAnswer"),
     PLAYER_JOINED("playerJoined"),
