@@ -11,6 +11,7 @@ import com.isitcake.game.services.PlayerService;
 import com.isitcake.game.util.SessionIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -54,12 +55,18 @@ public class GameSessionServiceImpl implements GameSessionService {
     }
 
     @Override
+//    @Transactional(readOnly = true)
     public List<Player> getPlayersBySessionId(String sessionId) {
         Optional<GameSession> optionalGameSession = gameSessionRepository.findBySessionId(sessionId);
         if (optionalGameSession.isEmpty()){
+            System.out.println("Game session optional is empty");
             return new ArrayList<Player>();
         }
-        return optionalGameSession.get().getPlayers();
+        GameSession gameSession = optionalGameSession.get();
+        System.out.println("Game session object found: " + gameSession);
+        List<Player> players = gameSession.getPlayers();
+        System.out.println("Game session players list: " + players);
+        return players;
     }
 
     @Override
