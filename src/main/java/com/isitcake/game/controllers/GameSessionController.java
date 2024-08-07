@@ -20,7 +20,6 @@ public class GameSessionController {
     @GetMapping("/{sessionId}")
     public ResponseEntity<?> getGameSession(@PathVariable String sessionId) {
         System.out.printf("Retrieving game session '%s'%n", sessionId);
-        System.out.println("Retrieving game session:" + sessionId);
         try {
             GameSessionDto gameSessionDto = gameSessionService.getGameSessionDto(gameSessionService.getGameSession(sessionId));
             if (gameSessionDto == null) {
