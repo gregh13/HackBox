@@ -55,7 +55,7 @@ public class GameSessionServiceImpl implements GameSessionService {
     }
 
     @Override
-//    @Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public List<Player> getPlayersBySessionId(String sessionId) {
         Optional<GameSession> optionalGameSession = gameSessionRepository.findBySessionId(sessionId);
         if (optionalGameSession.isEmpty()){
