@@ -18,6 +18,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Autowired
     PlayerRepository playerRepository;
 
+    @Autowired
     PlayerMapper playerMapper;
 
     @Override

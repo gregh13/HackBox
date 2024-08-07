@@ -24,6 +24,7 @@ public class GameSessionServiceImpl implements GameSessionService {
     @Autowired
     PlayerService playerService;
 
+    @Autowired
     GameSessionMapper gameSessionMapper;
 
     @Override
