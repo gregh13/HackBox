@@ -41,8 +41,8 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public Player updatePlayer(String playerName, GameSession gameSession, String choice, Double timeTaken) {
-        Optional<Player> playerOpt = gameSession.getPlayers().stream()
+    public Player updatePlayer(String playerName, List<Player> gameSessionPlayers, String choice, Double timeTaken) {
+        Optional<Player> playerOpt = gameSessionPlayers.stream()
                 .filter(p -> p.getName().equals(playerName))
                 .findFirst();
 
