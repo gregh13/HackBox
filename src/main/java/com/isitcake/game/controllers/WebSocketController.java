@@ -30,7 +30,7 @@ public class WebSocketController {
 
 
     @MessageMapping("/player-joined")
-    @SendTo("/topic/game-session")
+    @SendTo("/game-session")
     public WebSocketMessage<PlayerJoinedResponsePayload> handlePlayerJoined(PlayerJoinedAction playerJoinedAction) throws Exception {
         String sessionId = playerJoinedAction.getSessionId();
         PlayerJoinedActionPayload requestPayload = playerJoinedAction.getPayload();
@@ -46,7 +46,7 @@ public class WebSocketController {
     }
 
     @MessageMapping("/setup-question")
-    @SendTo("/topic/game-session")
+    @SendTo("/game-session")
     public WebSocketMessage<SetupQuestionResponsePayload> handleSetupQuestion(SetupQuestionAction setupQuestionAction) throws Exception {
         SetupQuestionActionPayload requestPayload = setupQuestionAction.getPayload();
         System.out.println("Setup Question Payload: " + requestPayload);
@@ -68,7 +68,7 @@ public class WebSocketController {
     }
 
     @MessageMapping("/submit-answer")
-    @SendTo("/topic/game-session")
+    @SendTo("/game-session")
     public WebSocketMessage<SubmitAnswerResponsePayload> handleSubmitAnswer(SubmitAnswerAction submitAnswerAction) throws Exception {
         SubmitAnswerActionPayload requestPayload = submitAnswerAction.getPayload();
         System.out.println("Submit Answer payload: " + requestPayload);
@@ -91,7 +91,7 @@ public class WebSocketController {
     }
 
     @MessageMapping("/transition-state")
-    @SendTo("/topic/game-session")
+    @SendTo("/game-session")
     public WebSocketMessage<TransitionStateResponsePayload> handleTransitionState(TransitionStateAction transitionStateAction) throws Exception {
         TransitionStateActionPayload requestPayload = transitionStateAction.getPayload();
         System.out.println("Transition State Payload: " + requestPayload);
