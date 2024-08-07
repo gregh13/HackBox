@@ -7,6 +7,7 @@ import com.isitcake.game.entities.payloads.*;
 import com.isitcake.game.enums.EventType;
 import com.isitcake.game.enums.QuestionType;
 import com.isitcake.game.enums.StateType;
+import com.isitcake.game.mappers.PlayerMapper;
 import com.isitcake.game.services.GameSessionService;
 
 import com.isitcake.game.services.PlayerService;
@@ -27,6 +28,8 @@ public class WebSocketController {
 
     @Autowired
     private PlayerService playerService;
+    @Autowired
+    private PlayerMapper playerMapper;
 
     @MessageMapping("/player-joined")
     @SendTo("/topic/game-session")
@@ -40,7 +43,7 @@ public class WebSocketController {
             return null;
         }
         List<Player> players = gameSession.getPlayers();
-        PlayerJoinedResponsePayload responsePayload = new PlayerJoinedResponsePayload(players);
+        PlayerJoinedResponsePayload responsePayload = new PlayerJoinedResponsePayload(playerMapper.entitiesToDtos(players));
         return new WebSocketMessage<>(sessionId, EventType.PLAYER_JOINED, responsePayload);
     }
 
@@ -85,7 +88,7 @@ public class WebSocketController {
             //TODO: add exception
             return null;
         }
-        SubmitAnswerResponsePayload responsePayload = new SubmitAnswerResponsePayload(player);
+        SubmitAnswerResponsePayload responsePayload = new SubmitAnswerResponsePayload(playerMapper.entityToDto(player));
         return new WebSocketMessage<>(sessionId, EventType.SUBMIT_ANSWER, responsePayload);
     }
 
@@ -104,7 +107,9 @@ public class WebSocketController {
 
         TransitionStateResponsePayload transitionStateResponsePayload;
         if (gameSession.getGameState().equals(StateType.RESULTS)) {
-            transitionStateResponsePayload = TransitionStateResponsePayload.withStateAndResults(StateType.RESULTS, gameSession.getPlayers());
+            transitionStateResponsePayload = TransitionStateResponsePayload.withStateAndResults(
+                    StateType.RESULTS,
+                    playerMapper.entitiesToDtos(gameSession.getPlayers()));
         } else {
             transitionStateResponsePayload = TransitionStateResponsePayload.withStateOnly(StateType.SETUP);
         }
