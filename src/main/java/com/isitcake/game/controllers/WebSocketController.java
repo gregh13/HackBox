@@ -7,7 +7,6 @@ import com.isitcake.game.entities.payloads.*;
 import com.isitcake.game.enums.EventType;
 import com.isitcake.game.enums.QuestionType;
 import com.isitcake.game.enums.StateType;
-import com.isitcake.game.mappers.PlayerMapper;
 import com.isitcake.game.services.GameSessionService;
 
 import com.isitcake.game.services.PlayerService;
@@ -29,7 +28,6 @@ public class WebSocketController {
     @Autowired
     private PlayerService playerService;
 
-    private PlayerMapper playerMapper;
 
     @MessageMapping("/player-joined")
     @SendTo("/topic/game-session")
@@ -43,7 +41,7 @@ public class WebSocketController {
             return null;
         }
         List<Player> players = gameSession.getPlayers();
-        PlayerJoinedResponsePayload responsePayload = new PlayerJoinedResponsePayload(playerMapper.entitiesToDtos(players));
+        PlayerJoinedResponsePayload responsePayload = new PlayerJoinedResponsePayload(playerService.getPlayerDtos(players));
         return new WebSocketMessage<>(sessionId, EventType.PLAYER_JOINED, responsePayload);
     }
 
@@ -88,7 +86,7 @@ public class WebSocketController {
             //TODO: add exception
             return null;
         }
-        SubmitAnswerResponsePayload responsePayload = new SubmitAnswerResponsePayload(playerMapper.entityToDto(player));
+        SubmitAnswerResponsePayload responsePayload = new SubmitAnswerResponsePayload(playerService.getPlayerDto(player));
         return new WebSocketMessage<>(sessionId, EventType.SUBMIT_ANSWER, responsePayload);
     }
 
@@ -109,7 +107,7 @@ public class WebSocketController {
         if (gameSession.getGameState().equals(StateType.RESULTS)) {
             transitionStateResponsePayload = TransitionStateResponsePayload.withStateAndResults(
                     StateType.RESULTS,
-                    playerMapper.entitiesToDtos(gameSession.getPlayers()));
+                    playerService.getPlayerDtos(gameSession.getPlayers()));
         } else {
             transitionStateResponsePayload = TransitionStateResponsePayload.withStateOnly(StateType.SETUP);
         }
