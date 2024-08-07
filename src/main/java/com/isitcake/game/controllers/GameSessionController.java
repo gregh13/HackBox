@@ -1,8 +1,11 @@
 package com.isitcake.game.controllers;
 
 import com.isitcake.game.entities.GameSession;
+import com.isitcake.game.entities.dtos.ErrorResponseDto;
+import com.isitcake.game.entities.dtos.GameSessionDto;
 import com.isitcake.game.services.GameSessionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,57 +18,60 @@ public class GameSessionController {
     GameSessionService gameSessionService;
 
     @GetMapping("/{sessionId}")
-    public ResponseEntity<GameSession> getGameSession(@PathVariable String sessionId) {
+    public ResponseEntity<?> getGameSession(@PathVariable String sessionId) {
         System.out.printf("Retrieving game session '%s'%n", sessionId);
         try {
-            GameSession gameSession = gameSessionService.getGameSession(sessionId);
-            if (gameSession == null) {
+            GameSessionDto gameSessionDto = gameSessionService.getGameSessionDto(gameSessionService.getGameSession(sessionId));
+            if (gameSessionDto == null) {
                 throw new RuntimeException("Game session is null");
             }
-            return ResponseEntity.ok(gameSession);
+            return new ResponseEntity<>(gameSessionDto, HttpStatus.OK);
         } catch (RuntimeException e) {
             System.out.println("\nRetrieve game error: " + e + "\n");
             e.printStackTrace();
-            return ResponseEntity.status(404).body(null);
+            ErrorResponseDto errorResponse = new ErrorResponseDto("Error: Issue finding game session", HttpStatus.NOT_FOUND.value());
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping("/create")
-    public ResponseEntity<GameSession> createGameSession(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<?> createGameSession(@RequestBody Map<String, String> payload) {
         String playerName = payload.get("playerName");
         System.out.println("Game created by: " + playerName);
 
         try {
-            GameSession gameSession = gameSessionService.createGameSession(playerName);
-            if (gameSession == null) {
+            GameSessionDto gameSessionDto = gameSessionService.getGameSessionDto(gameSessionService.createGameSession(playerName));
+            if (gameSessionDto == null) {
                 throw new RuntimeException("Game Session is null");
             }
-            return ResponseEntity.ok(gameSession);
+            return new ResponseEntity<>(gameSessionDto, HttpStatus.OK);
 
         } catch (RuntimeException e){
             System.out.println("\nCreate game error: " + e + "\n");
             e.printStackTrace();
-            return ResponseEntity.status(404).body(null);
+            ErrorResponseDto errorResponse = new ErrorResponseDto("Error: Issue creating game session", HttpStatus.NOT_FOUND.value());
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping("/join")
-    public ResponseEntity<GameSession> joinGameSession(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<?> joinGameSession(@RequestBody Map<String, String> payload) {
         String playerName = payload.get("playerName");
         String sessionId = payload.get("sessionId");
         System.out.printf("Player '%s' wants to join game session '%s'%n", playerName, sessionId);
 
         try {
-            GameSession gameSession = gameSessionService.joinGameSession(playerName, sessionId);
-            if (gameSession == null) {
+            GameSessionDto gameSessionDto = gameSessionService.getGameSessionDto(gameSessionService.joinGameSession(playerName, sessionId));
+            if (gameSessionDto == null) {
                 throw new RuntimeException("Game Session is null");
             }
-            return ResponseEntity.ok(gameSession);
+            return new ResponseEntity<>(gameSessionDto, HttpStatus.OK);
 
         } catch (RuntimeException e) {
             System.out.println("\nJoin game error: " + e + "\n");
             e.printStackTrace();
-            return ResponseEntity.status(404).body(null);
+            ErrorResponseDto errorResponse = new ErrorResponseDto("Error: Issue joining game session", HttpStatus.NOT_FOUND.value());
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
         }
 
     }
