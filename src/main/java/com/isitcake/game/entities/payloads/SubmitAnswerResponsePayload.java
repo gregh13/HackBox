@@ -1,4 +1,6 @@
 package com.isitcake.game.entities.payloads;
 
-public record SubmitAnswerResponsePayload(String playerName, String choice, Double timeTaken) { }
+import com.isitcake.game.entities.Player;
+
+public record SubmitAnswerResponsePayload(Player player) { }
 

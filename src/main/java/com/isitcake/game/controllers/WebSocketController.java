@@ -85,7 +85,7 @@ public class WebSocketController {
             //TODO: add exception
             return null;
         }
-        SubmitAnswerResponsePayload responsePayload = PayloadConverter.toResponsePayload(requestPayload);
+        SubmitAnswerResponsePayload responsePayload = new SubmitAnswerResponsePayload(player);
         return new WebSocketMessage<>(sessionId, EventType.SUBMIT_ANSWER, responsePayload);
     }
 
