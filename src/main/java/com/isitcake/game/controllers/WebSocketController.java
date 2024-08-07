@@ -28,7 +28,7 @@ public class WebSocketController {
 
     @Autowired
     private PlayerService playerService;
-    @Autowired
+
     private PlayerMapper playerMapper;
 
     @MessageMapping("/player-joined")
