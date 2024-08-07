@@ -34,13 +34,11 @@ public class WebSocketController {
     public WebSocketMessage<PlayerJoinedResponsePayload> handlePlayerJoined(PlayerJoinedAction playerJoinedAction) throws Exception {
         String sessionId = playerJoinedAction.getSessionId();
         PlayerJoinedActionPayload requestPayload = playerJoinedAction.getPayload();
+        System.out.println("PlayerJoinedAction object: " + playerJoinedAction);
         System.out.println("Player joined payload: " + requestPayload);
-        GameSession gameSession = gameSessionService.getGameSession(sessionId);
-        if (gameSession == null) {
-            //TODO: add exception
-            return null;
-        }
-        List<Player> players = gameSession.getPlayers();
+        System.out.println("SessionId: " + sessionId);
+
+        List<Player> players = gameSessionService.getPlayersBySessionId(sessionId);
         PlayerJoinedResponsePayload responsePayload = new PlayerJoinedResponsePayload(playerService.getPlayerDtos(players));
         return new WebSocketMessage<>(sessionId, EventType.PLAYER_JOINED, responsePayload);
     }
@@ -58,6 +56,7 @@ public class WebSocketController {
         GameSession gameSession = gameSessionService.updateGameState(setupQuestionAction.getSessionId(), StateType.QUESTION);
         if (gameSession == null) {
             //TODO: add exception
+            System.out.println("Game session could not be found");
             return null;
         }
         SetupQuestionResponsePayload responsePayload = PayloadConverter.toResponsePayload(requestPayload);
@@ -75,13 +74,9 @@ public class WebSocketController {
 
         String sessionId = submitAnswerAction.getSessionId();
 
-        GameSession gameSession = gameSessionService.getGameSession(sessionId);
-        if (gameSession == null) {
-            //TODO: add exception
-            return null;
-        }
+        List<Player> gameSessionPlayers = gameSessionService.getPlayersBySessionId(sessionId);
 
-        Player player = playerService.updatePlayer(requestPayload.playerName(), gameSession, requestPayload.choice(), requestPayload.timeTaken());
+        Player player = playerService.updatePlayer(requestPayload.playerName(), gameSessionPlayers, requestPayload.choice(), requestPayload.timeTaken());
         if (player == null) {
             //TODO: add exception
             return null;
@@ -100,6 +95,7 @@ public class WebSocketController {
         GameSession gameSession = gameSessionService.updateGameState(sessionId, requestPayload.state());
         if (gameSession == null) {
             //TODO: add exception
+            System.out.println("Game session update failed");
             return null;
         }
 
@@ -107,7 +103,7 @@ public class WebSocketController {
         if (gameSession.getGameState().equals(StateType.RESULTS)) {
             transitionStateResponsePayload = TransitionStateResponsePayload.withStateAndResults(
                     StateType.RESULTS,
-                    playerService.getPlayerDtos(gameSession.getPlayers()));
+                    playerService.getPlayerDtos(gameSessionService.getPlayersBySessionId(sessionId)));
         } else {
             transitionStateResponsePayload = TransitionStateResponsePayload.withStateOnly(StateType.SETUP);
         }
