@@ -5,6 +5,11 @@ import lombok.Getter;
 
 @Getter
 public abstract class PlayerAction {
-    String sessionId;
-    private EventType eventType;
+    private final String sessionId;
+    private final EventType eventType;
+
+    protected PlayerAction(String sessionId, EventType eventType) {
+        this.sessionId = sessionId;
+        this.eventType = eventType;
+    }
 }
