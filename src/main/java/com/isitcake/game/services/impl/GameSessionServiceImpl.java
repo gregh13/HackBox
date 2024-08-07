@@ -2,7 +2,9 @@ package com.isitcake.game.services.impl;
 
 import com.isitcake.game.entities.GameSession;
 import com.isitcake.game.entities.Player;
+import com.isitcake.game.entities.dtos.GameSessionDto;
 import com.isitcake.game.enums.StateType;
+import com.isitcake.game.mappers.GameSessionMapper;
 import com.isitcake.game.repositories.GameSessionRepository;
 import com.isitcake.game.services.GameSessionService;
 import com.isitcake.game.services.PlayerService;
@@ -22,6 +24,8 @@ public class GameSessionServiceImpl implements GameSessionService {
     @Autowired
     PlayerService playerService;
 
+    GameSessionMapper gameSessionMapper;
+
     @Override
     public GameSession updateGameState(String sessionId, StateType gameState) {
         GameSession gameSession = getGameSession(sessionId);
@@ -37,6 +41,14 @@ public class GameSessionServiceImpl implements GameSessionService {
     public GameSession getGameSession(String sessionId) {
         Optional<GameSession> optionalGameSession = gameSessionRepository.findBySessionId(sessionId);
         return optionalGameSession.orElse(null);
+    }
+
+    @Override
+    public GameSessionDto getGameSessionDto(GameSession gameSession) {
+        if (gameSession == null) {
+            return null;
+        }
+        return gameSessionMapper.entityToDto(gameSession);
     }
 
     @Override
