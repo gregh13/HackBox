@@ -30,7 +30,7 @@ public class WebSocketController {
 
 
     @MessageMapping("/player-joined")
-    @SendTo("/game-session")
+    @SendTo("/topic/game-session")
     public WebSocketMessage<PlayerJoinedResponsePayload> handlePlayerJoined(PlayerJoinedAction playerJoinedAction) throws Exception {
         String sessionId = playerJoinedAction.getSessionId();
         PlayerJoinedActionPayload requestPayload = playerJoinedAction.getPayload();
@@ -40,7 +40,11 @@ public class WebSocketController {
 
         List<Player> players = gameSessionService.getPlayersBySessionId(sessionId);
         PlayerJoinedResponsePayload responsePayload = new PlayerJoinedResponsePayload(playerService.getPlayerDtos(players));
-        return new WebSocketMessage<>(sessionId, EventType.PLAYER_JOINED, responsePayload);
+        WebSocketMessage<PlayerJoinedResponsePayload> message = new WebSocketMessage<>(sessionId, EventType.PLAYER_JOINED, responsePayload);
+        System.out.println("Outgoing Websocket message below: ");
+        System.out.println(message);
+        System.out.println("Sending message back!");
+        return message;
     }
 
     @MessageMapping("/setup-question")
