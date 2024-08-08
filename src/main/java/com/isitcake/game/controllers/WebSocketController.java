@@ -14,6 +14,7 @@ import com.isitcake.game.util.PayloadConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import com.isitcake.game.entities.WebSocketMessage;
 
@@ -27,11 +28,13 @@ public class WebSocketController {
 
     @Autowired
     private PlayerService playerService;
+    @Autowired
+    private SimpMessagingTemplate template;
 
 
     @MessageMapping("/player-joined")
-    @SendTo("/topic/game-session")
-    public WebSocketMessage<PlayerJoinedResponsePayload> handlePlayerJoined(PlayerJoinedAction playerJoinedAction) throws Exception {
+//    @SendTo("/topic/game-session")
+    public void handlePlayerJoined(PlayerJoinedAction playerJoinedAction) throws Exception {
         String sessionId = playerJoinedAction.getSessionId();
         PlayerJoinedActionPayload requestPayload = playerJoinedAction.getPayload();
         System.out.println("PlayerJoinedAction object: " + playerJoinedAction);
@@ -44,7 +47,8 @@ public class WebSocketController {
         System.out.println("Outgoing Websocket message below: ");
         System.out.println(message);
         System.out.println("Sending message back!");
-        return message;
+        this.template.convertAndSend("/topic/game-session", message);
+//        return message;
     }
 
     @MessageMapping("/setup-question")
