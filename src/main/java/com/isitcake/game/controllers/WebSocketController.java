@@ -111,10 +111,10 @@ public class WebSocketController {
         TransitionStateResponsePayload transitionStateResponsePayload;
         if (gameSession.getGameState().equals(StateType.RESULTS)) {
             transitionStateResponsePayload = TransitionStateResponsePayload.withStateAndResults(
-                    StateType.RESULTS,
+                    StateType.RESULTS.getValue(),
                     playerService.getPlayerDtos(gameSessionService.getPlayersBySessionId(sessionId)));
         } else {
-            transitionStateResponsePayload = TransitionStateResponsePayload.withStateOnly(StateType.SETUP);
+            transitionStateResponsePayload = TransitionStateResponsePayload.withStateOnly(StateType.SETUP.getValue());
         }
 
         return new WebSocketMessage<>(
