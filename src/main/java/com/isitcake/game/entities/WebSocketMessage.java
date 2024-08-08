@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class WebSocketMessage<T> {
     private String sessionId;
-    private EventType eventType;
+    private String eventType;
     private T payload;
 
 
