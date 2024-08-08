@@ -33,7 +33,6 @@ public class Player {
                 " | score=" + score +
                 " | choice=" + choice +
                 " | timeTaken=" + timeTaken +
-                " | gameSession=" + gameSession +
                 " }";
     }
 }
