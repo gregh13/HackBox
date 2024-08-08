@@ -77,8 +77,8 @@ public class WebSocketController {
     }
 
     @MessageMapping("/submit-answer")
-    @SendTo("/game-session")
-    public WebSocketMessage<SubmitAnswerResponsePayload> handleSubmitAnswer(SubmitAnswerAction submitAnswerAction) throws Exception {
+//    @SendTo("/game-session")
+    public void handleSubmitAnswer(SubmitAnswerAction submitAnswerAction) throws Exception {
         SubmitAnswerActionPayload requestPayload = submitAnswerAction.getPayload();
         System.out.println("Submit Answer payload: " + requestPayload);
 
@@ -89,15 +89,21 @@ public class WebSocketController {
         Player player = playerService.updatePlayer(requestPayload.playerName(), gameSessionPlayers, requestPayload.choice(), requestPayload.timeTaken());
         if (player == null) {
             //TODO: add exception
-            return null;
+            System.out.println("Player could not be found");
+//            return null;
         }
         SubmitAnswerResponsePayload responsePayload = new SubmitAnswerResponsePayload(playerService.getPlayerDto(player));
-        return new WebSocketMessage<>(sessionId, EventType.SUBMIT_ANSWER.getValue(), responsePayload);
+        WebSocketMessage<SubmitAnswerResponsePayload> message = new WebSocketMessage<>(
+                sessionId,
+                EventType.SUBMIT_ANSWER.getValue(),
+                responsePayload);
+
+        this.template.convertAndSend("/topic/game-session", message);
     }
 
     @MessageMapping("/transition-state")
-    @SendTo("/game-session")
-    public WebSocketMessage<TransitionStateResponsePayload> handleTransitionState(TransitionStateAction transitionStateAction) throws Exception {
+//    @SendTo("/game-session")
+    public void handleTransitionState(TransitionStateAction transitionStateAction) throws Exception {
         TransitionStateActionPayload requestPayload = transitionStateAction.getPayload();
         System.out.println("Transition State Payload: " + requestPayload);
         System.out.println("Transition State Type: " + requestPayload.state());
@@ -107,11 +113,11 @@ public class WebSocketController {
         if (gameSession == null) {
             //TODO: add exception
             System.out.println("Game session update failed");
-            return null;
+//            return null;
         }
-        System.out.println("Game session gameState: " + gameSession.getGameState());
+
         TransitionStateResponsePayload transitionStateResponsePayload;
-        if (gameSession.getGameState().equals(StateType.RESULTS)) {
+        if (requestPayload.state().equals(StateType.RESULTS)) {
             transitionStateResponsePayload = TransitionStateResponsePayload.withStateAndResults(
                     StateType.RESULTS.getValue(),
                     playerService.getPlayerDtos(gameSessionService.getPlayersBySessionId(sessionId)));
@@ -119,11 +125,12 @@ public class WebSocketController {
             transitionStateResponsePayload = TransitionStateResponsePayload.withStateOnly(StateType.SETUP.getValue());
         }
 
-        return new WebSocketMessage<>(
+        WebSocketMessage<TransitionStateResponsePayload> message = new WebSocketMessage<>(
                 transitionStateAction.getSessionId(),
                 transitionStateAction.getEventType().getValue(),
-                transitionStateResponsePayload
-        );
+                transitionStateResponsePayload);
+
+        this.template.convertAndSend("/topic/game-session", message);
     }
 }
 
