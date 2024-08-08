@@ -56,6 +56,7 @@ public class WebSocketController {
     public void handleSetupQuestion(SetupQuestionAction setupQuestionAction) throws Exception {
         SetupQuestionActionPayload requestPayload = setupQuestionAction.getPayload();
         System.out.println("Setup Question Payload: " + requestPayload);
+        System.out.println("Setup Question Type: " + requestPayload.questionType());
         if (requestPayload.questionType() == null || requestPayload.timer() == null || (requestPayload.questionType() == QuestionType.CHOICE && requestPayload.choices() == null)) {
             // TODO: add exceptions
             System.out.println("Request Payload is missing required values");
@@ -99,6 +100,7 @@ public class WebSocketController {
     public WebSocketMessage<TransitionStateResponsePayload> handleTransitionState(TransitionStateAction transitionStateAction) throws Exception {
         TransitionStateActionPayload requestPayload = transitionStateAction.getPayload();
         System.out.println("Transition State Payload: " + requestPayload);
+        System.out.println("Transition State Type: " + requestPayload.state());
 
         String sessionId = transitionStateAction.getSessionId();
         GameSession gameSession = gameSessionService.updateGameState(sessionId, requestPayload.state());
@@ -107,7 +109,7 @@ public class WebSocketController {
             System.out.println("Game session update failed");
             return null;
         }
-
+        System.out.println("Game session gameState: " + gameSession.getGameState());
         TransitionStateResponsePayload transitionStateResponsePayload;
         if (gameSession.getGameState().equals(StateType.RESULTS)) {
             transitionStateResponsePayload = TransitionStateResponsePayload.withStateAndResults(
