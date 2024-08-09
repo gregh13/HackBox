@@ -116,4 +116,9 @@ public class GameSessionServiceImpl implements GameSessionService {
         gameSession.getPlayers().add(newPlayer);
         return gameSessionRepository.saveAndFlush(gameSession);
     }
+
+    @Override
+    public void removeStaleGames() {
+        gameSessionRepository.deleteAllOldSessions();
+    }
 }
