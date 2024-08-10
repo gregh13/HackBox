@@ -36,16 +36,16 @@ public class GameSessionServiceImpl implements GameSessionService {
         if (gameSession == null) {
             return null;
         }
-        List<Player> players = gameSession.getPlayers();
-        if (gameState.equals(StateType.QUESTION)){
-            players = playerService.resetPlayerChoices(players);
-        }
-        if (gameState.equals(StateType.SETUP)) {
-            players = playerService.removeInactivePlayers(players);
-        }
+//        List<Player> players = gameSession.getPlayers();
+//        if (gameState.equals(StateType.QUESTION)){
+//            players = playerService.resetPlayerChoices(players);
+//        }
+//        if (gameState.equals(StateType.SETUP)) {
+//            players = playerService.removeInactivePlayers(players);
+//        }
+//        gameSession.setPlayers(players);
 
         gameSession.setGameState(gameState);
-        gameSession.setPlayers(players);
         return gameSessionRepository.saveAndFlush(gameSession);
 
     }
