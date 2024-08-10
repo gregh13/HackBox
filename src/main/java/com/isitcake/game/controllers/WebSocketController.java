@@ -74,7 +74,7 @@ public class WebSocketController {
 
         String sessionId = submitAnswerAction.getSessionId();
 
-        Player player = playerService.updatePlayer(requestPayload.playerName(), sessionId, requestPayload.choice(), requestPayload.timeTaken());
+        Player player = playerService.updatePlayer(sessionId, requestPayload.playerName(), requestPayload.choice(), requestPayload.timeTaken());
         if (player == null) {
             //TODO: add exception
             System.out.println("Player could not be found");
