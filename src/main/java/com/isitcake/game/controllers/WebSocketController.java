@@ -13,7 +13,6 @@ import com.isitcake.game.services.PlayerService;
 import com.isitcake.game.util.PayloadConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import com.isitcake.game.entities.WebSocketMessage;
@@ -31,9 +30,7 @@ public class WebSocketController {
     @Autowired
     private SimpMessagingTemplate template;
 
-
     @MessageMapping("/player-joined")
-//    @SendTo("/topic/game-session")
     public void handlePlayerJoined(PlayerJoinedAction playerJoinedAction) throws Exception {
         String sessionId = playerJoinedAction.getSessionId();
         PlayerJoinedActionPayload requestPayload = playerJoinedAction.getPayload();
@@ -44,15 +41,11 @@ public class WebSocketController {
         List<Player> players = gameSessionService.getPlayersBySessionId(sessionId);
         PlayerJoinedResponsePayload responsePayload = new PlayerJoinedResponsePayload(playerService.getPlayerDtos(players));
         WebSocketMessage<PlayerJoinedResponsePayload> message = new WebSocketMessage<>(sessionId, EventType.PLAYER_JOINED.getValue(), responsePayload);
-        System.out.println("Outgoing Websocket message below: ");
-        System.out.println(message);
-        System.out.println("Sending message back!");
         this.template.convertAndSend("/topic/game-session", message);
-//        return message;
     }
 
     @MessageMapping("/setup-question")
-//    @SendTo("/game-session")
+
     public void handleSetupQuestion(SetupQuestionAction setupQuestionAction) throws Exception {
         SetupQuestionActionPayload requestPayload = setupQuestionAction.getPayload();
         System.out.println("Setup Question Payload: " + requestPayload);
@@ -60,13 +53,11 @@ public class WebSocketController {
         if (requestPayload.questionType() == null || requestPayload.timer() == null || (requestPayload.questionType() == QuestionType.CHOICE && requestPayload.choices() == null)) {
             // TODO: add exceptions
             System.out.println("Request Payload is missing required values");
-//            return null;
         }
-        GameSession gameSession = gameSessionService.updateGameState(setupQuestionAction.getSessionId(), StateType.QUESTION);
+        GameSession gameSession = gameSessionService.updateGameStateAndPlayers(setupQuestionAction.getSessionId(), StateType.QUESTION);
         if (gameSession == null) {
             //TODO: add exception
             System.out.println("Game session could not be found");
-//            return null;
         }
         SetupQuestionResponsePayload responsePayload = PayloadConverter.toResponsePayload(requestPayload);
         WebSocketMessage<SetupQuestionResponsePayload> message = new WebSocketMessage<>(
@@ -77,20 +68,16 @@ public class WebSocketController {
     }
 
     @MessageMapping("/submit-answer")
-//    @SendTo("/game-session")
     public void handleSubmitAnswer(SubmitAnswerAction submitAnswerAction) throws Exception {
         SubmitAnswerActionPayload requestPayload = submitAnswerAction.getPayload();
         System.out.println("Submit Answer payload: " + requestPayload);
 
         String sessionId = submitAnswerAction.getSessionId();
 
-        List<Player> gameSessionPlayers = gameSessionService.getPlayersBySessionId(sessionId);
-
-        Player player = playerService.updatePlayer(requestPayload.playerName(), gameSessionPlayers, requestPayload.choice(), requestPayload.timeTaken());
+        Player player = playerService.updatePlayer(requestPayload.playerName(), sessionId, requestPayload.choice(), requestPayload.timeTaken());
         if (player == null) {
             //TODO: add exception
             System.out.println("Player could not be found");
-//            return null;
         }
         SubmitAnswerResponsePayload responsePayload = new SubmitAnswerResponsePayload(playerService.getPlayerDto(player));
         WebSocketMessage<SubmitAnswerResponsePayload> message = new WebSocketMessage<>(
@@ -102,18 +89,16 @@ public class WebSocketController {
     }
 
     @MessageMapping("/transition-state")
-//    @SendTo("/game-session")
     public void handleTransitionState(TransitionStateAction transitionStateAction) throws Exception {
         TransitionStateActionPayload requestPayload = transitionStateAction.getPayload();
         System.out.println("Transition State Payload: " + requestPayload);
         System.out.println("Transition State Type: " + requestPayload.state());
 
         String sessionId = transitionStateAction.getSessionId();
-        GameSession gameSession = gameSessionService.updateGameState(sessionId, requestPayload.state());
+        GameSession gameSession = gameSessionService.updateGameStateAndPlayers(sessionId, requestPayload.state());
         if (gameSession == null) {
             //TODO: add exception
             System.out.println("Game session update failed");
-//            return null;
         }
 
         TransitionStateResponsePayload transitionStateResponsePayload;
@@ -130,6 +115,19 @@ public class WebSocketController {
                 transitionStateAction.getEventType().getValue(),
                 transitionStateResponsePayload);
 
+        this.template.convertAndSend("/topic/game-session", message);
+    }
+
+    @MessageMapping("/transfer-host")
+    public void handleTransferHost(TransferHostAction transferHostAction) throws Exception {
+        String sessionId = transferHostAction.getSessionId();
+        TransferHostActionPayload requestPayload = transferHostAction.getPayload();
+        System.out.println("TransferHostAction object: " + transferHostAction);
+        System.out.println("Transfer host payload: " + requestPayload);
+        System.out.println("SessionId: " + sessionId);
+
+        TransferHostResponsePayload responsePayload = new TransferHostResponsePayload(playerService.transferHost(sessionId, requestPayload.playerName()));
+        WebSocketMessage<TransferHostResponsePayload> message = new WebSocketMessage<>(sessionId, EventType.PLAYER_JOINED.getValue(), responsePayload);
         this.template.convertAndSend("/topic/game-session", message);
     }
 }
