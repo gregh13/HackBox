@@ -40,7 +40,7 @@ public class GameSessionController {
         System.out.println("Game created by: " + playerName);
 
         try {
-            gameSessionService.removeStaleGames();
+
             GameSessionDto gameSessionDto = gameSessionService.getGameSessionDto(gameSessionService.createGameSession(playerName));
             if (gameSessionDto == null) {
                 throw new RuntimeException("Game Session is null");
