@@ -26,6 +26,6 @@ public interface GameSessionRepository extends JpaRepository<GameSession, Long> 
 
     @Modifying
     @Query("DELETE FROM GameSession gs WHERE gs.dateCreated < :cutoffDate")
-    void deleteAllOldSessions();
+    void deleteAllOldSessions(Timestamp cutoffDate);
 }
 
