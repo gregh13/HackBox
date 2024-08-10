@@ -30,6 +30,7 @@ public class GameSessionServiceImpl implements GameSessionService {
     GameSessionMapper gameSessionMapper;
 
     @Override
+    @Transactional
     public GameSession updateGameStateAndPlayers(String sessionId, StateType gameState) {
         GameSession gameSession = getGameSession(sessionId);
         if (gameSession == null) {
