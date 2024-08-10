@@ -24,7 +24,7 @@ public class GameSession {
     private Timestamp dateCreated;
 
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "gameSession", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     List<Player> players  = new ArrayList<>();
 
