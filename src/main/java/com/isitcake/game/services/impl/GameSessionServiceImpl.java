@@ -30,12 +30,21 @@ public class GameSessionServiceImpl implements GameSessionService {
     GameSessionMapper gameSessionMapper;
 
     @Override
-    public GameSession updateGameState(String sessionId, StateType gameState) {
+    public GameSession updateGameStateAndPlayers(String sessionId, StateType gameState) {
         GameSession gameSession = getGameSession(sessionId);
         if (gameSession == null) {
             return null;
         }
+        List<Player> players = gameSession.getPlayers();
+        if (gameState.equals(StateType.QUESTION)){
+            players = playerService.resetPlayerChoices(players);
+        }
+        if (gameState.equals(StateType.SETUP)) {
+            players = playerService.removeInactivePlayers(players);
+        }
+
         gameSession.setGameState(gameState);
+        gameSession.setPlayers(players);
         return gameSessionRepository.saveAndFlush(gameSession);
 
     }
@@ -43,7 +52,12 @@ public class GameSessionServiceImpl implements GameSessionService {
     @Override
     public GameSession getGameSession(String sessionId) {
         Optional<GameSession> optionalGameSession = gameSessionRepository.findBySessionId(sessionId);
-        return optionalGameSession.orElse(null);
+        if (optionalGameSession.isEmpty()) {
+            // TODO: Add exception here
+            System.out.println("Error: Optional Game Session is empty");
+            return null;
+        }
+        return optionalGameSession.get();
     }
 
     @Override
@@ -118,7 +132,8 @@ public class GameSessionServiceImpl implements GameSessionService {
     }
 
     @Override
+    @Transactional
     public void removeStaleGames() {
-        gameSessionRepository.deleteAllOldSessions();
+        gameSessionRepository.deleteAllOldSessions(new Timestamp(System.currentTimeMillis()));
     }
 }

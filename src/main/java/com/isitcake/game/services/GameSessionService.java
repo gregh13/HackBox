@@ -9,7 +9,7 @@ import com.isitcake.game.enums.StateType;
 import java.util.List;
 
 public interface GameSessionService {
-    GameSession updateGameState(String sessionId, StateType gameState);
+    GameSession updateGameStateAndPlayers(String sessionId, StateType gameState);
     GameSession getGameSession(String sessionId);
     GameSessionDto getGameSessionDto(GameSession gameSession);
 
