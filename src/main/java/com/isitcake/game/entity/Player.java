@@ -6,21 +6,36 @@ import lombok.Data;
 
 @Entity
 @Data
+@Table(name = "player")
 public class Player {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="id")
     private Long id;
+
+    @Column(name="name")
     private String name;
+
+    @Column(name="session_id")
     private String sessionId;
+
+    @Column(name="session_host")
     private Boolean sessionHost = false;
+
+    @Column(name="score")
     private Integer score = 0;
+
+    @Column(name="choice")
     private String choice = "";
+
+    @Column(name="time_taken")
     private Double timeTaken = 0.0;
 
     @ManyToOne
     @JoinColumn(name = "game_session_id")
     @JsonBackReference
+    @Column(name="game_session")
     private GameSession gameSession;
 
     @Override
