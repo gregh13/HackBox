@@ -3,6 +3,9 @@ package com.isitcake.game.service.impl;
 import com.isitcake.game.entity.GameSession;
 import com.isitcake.game.entity.Player;
 import com.isitcake.game.dto.response.GameSessionResponseDto;
+import com.isitcake.game.exception.GameSessionNotFoundException;
+import com.isitcake.game.exception.NullEntityException;
+import com.isitcake.game.exception.PlayerNotFoundException;
 import com.isitcake.game.type.StateType;
 import com.isitcake.game.mapper.GameSessionMapper;
 import com.isitcake.game.repository.GameSessionRepository;
@@ -30,26 +33,20 @@ public class GameSessionServiceImpl implements GameSessionService {
     GameSessionMapper gameSessionMapper;
 
     @Override
-    public GameSession updateGameState(String sessionId, StateType gameState) {
-        GameSession gameSession = getGameSession(sessionId);
-        if (gameSession == null) {
-            return null;
-        }
-        gameSession.setGameState(gameState);
-        return gameSessionRepository.saveAndFlush(gameSession);
-
-    }
-
-    @Override
     public GameSession getGameSession(String sessionId) {
         Optional<GameSession> optionalGameSession = gameSessionRepository.findBySessionId(sessionId);
-        return optionalGameSession.orElse(null);
+        if (optionalGameSession.isEmpty()) {
+            String message = "Could not find game session with id: " + sessionId;
+            throw new GameSessionNotFoundException(message);
+        }
+        return optionalGameSession.get();
     }
 
     @Override
     public GameSessionResponseDto getGameSessionDto(GameSession gameSession) {
         if (gameSession == null) {
-            return null;
+            String message = "Game session is null, cannot create gameSessionDto";
+            throw new NullEntityException(message);
         }
         return gameSessionMapper.entityToDto(gameSession);
     }
@@ -70,6 +67,7 @@ public class GameSessionServiceImpl implements GameSessionService {
     }
 
     @Override
+    @Transactional
     public GameSession createGameSession(String playerName) {
         String gameSessionId;
         Optional<GameSession> existingGameSession;
@@ -98,22 +96,19 @@ public class GameSessionServiceImpl implements GameSessionService {
 
 
     @Override
+    @Transactional
     public GameSession joinGameSession(String playerName, String sessionId) {
-        Optional<GameSession> optionalGameSession = gameSessionRepository.findBySessionId(sessionId);
-        if (optionalGameSession.isEmpty()) {
-            // TODO: add exception here
-            System.out.println("Error: Game session '" + sessionId + "' could not be found.");
-            return null;
-        }
-
-        GameSession gameSession = optionalGameSession.get();
+        GameSession gameSession = getGameSession(sessionId);
         Player newPlayer = playerService.createPlayer(playerName, gameSession, false);
-        if (newPlayer == null) {
-            // TODO: add exception here
-            return null;
-        }
-
         gameSession.getPlayers().add(newPlayer);
+        return gameSessionRepository.saveAndFlush(gameSession);
+    }
+
+    @Override
+    @Transactional
+    public GameSession updateGameState(String sessionId, StateType gameState) {
+        GameSession gameSession = getGameSession(sessionId);
+        gameSession.setGameState(gameState);
         return gameSessionRepository.saveAndFlush(gameSession);
     }
 }
