@@ -12,8 +12,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/game-sessions")
 public class GameSessionController {
-    @Autowired
     GameSessionService gameSessionService;
+
+    @Autowired
+    public GameSessionController(GameSessionService gameSessionService) {
+        this.gameSessionService = gameSessionService;
+    }
 
     @GetMapping("/{sessionId}")
     public ResponseEntity<?> getGameSession(@PathVariable String sessionId) {

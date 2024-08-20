@@ -24,15 +24,16 @@ import java.util.List;
 
 @Controller
 public class WebSocketController {
+    GameSessionService gameSessionService;
+    PlayerService playerService;
+    SimpMessagingTemplate template;
 
     @Autowired
-    private GameSessionService gameSessionService;
-
-    @Autowired
-    private PlayerService playerService;
-    @Autowired
-    private SimpMessagingTemplate template;
-
+    public WebSocketController(GameSessionService gameSessionService, PlayerService playerService, SimpMessagingTemplate template) {
+        this.gameSessionService = gameSessionService;
+        this.playerService = playerService;
+        this.template = template;
+    }
 
     @MessageMapping("/player-joined")
 //    @SendTo("/topic/game-session")

@@ -19,11 +19,14 @@ import java.util.Optional;
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
-    @Autowired
     PlayerRepository playerRepository;
+    PlayerMapper playerMapper;
 
     @Autowired
-    PlayerMapper playerMapper;
+    public PlayerServiceImpl(PlayerRepository playerRepository, PlayerMapper playerMapper) {
+        this.playerRepository = playerRepository;
+        this.playerMapper = playerMapper;
+    }
 
     @Override
     public Player createPlayer(String playerName, GameSession gameSession, Boolean isHost) {

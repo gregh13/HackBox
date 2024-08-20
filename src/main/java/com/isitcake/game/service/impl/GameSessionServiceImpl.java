@@ -23,14 +23,16 @@ import java.util.Optional;
 
 @Service
 public class GameSessionServiceImpl implements GameSessionService {
-    @Autowired
     GameSessionRepository gameSessionRepository;
-
-    @Autowired
     PlayerService playerService;
+    GameSessionMapper gameSessionMapper;
 
     @Autowired
-    GameSessionMapper gameSessionMapper;
+    public GameSessionServiceImpl(GameSessionRepository gameSessionRepository, PlayerService playerService, GameSessionMapper gameSessionMapper) {
+        this.gameSessionRepository = gameSessionRepository;
+        this.playerService = playerService;
+        this.gameSessionMapper = gameSessionMapper;
+    }
 
     @Override
     public GameSession getGameSession(String sessionId) {
