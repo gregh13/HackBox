@@ -1,7 +1,7 @@
 package com.isitcake.game.controller;
 
 import com.isitcake.game.dto.response.GameSessionResponseDto;
-import com.isitcake.game.dto.response.ErrorResponseDto;
+import com.isitcake.game.dto.response.error.ErrorResponseDto;
 import com.isitcake.game.service.GameSessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
