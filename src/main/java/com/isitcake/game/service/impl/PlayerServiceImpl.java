@@ -26,7 +26,6 @@ public class PlayerServiceImpl implements PlayerService {
     PlayerMapper playerMapper;
 
     @Override
-    @Transactional
     public Player createPlayer(String playerName, GameSession gameSession, Boolean isHost) {
         for (Player player : gameSession.getPlayers() ) {
             if (player.getName().equals(playerName)) {
@@ -45,7 +44,6 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    @Transactional
     public Player updatePlayer(String playerName, List<Player> gameSessionPlayers, String choice, Double timeTaken) {
         Optional<Player> playerOpt = gameSessionPlayers.stream()
                 .filter(p -> p.getName().equals(playerName))

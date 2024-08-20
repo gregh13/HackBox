@@ -52,7 +52,6 @@ public class GameSessionServiceImpl implements GameSessionService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Player> getPlayersBySessionId(String sessionId) {
         Optional<GameSession> optionalGameSession = gameSessionRepository.findBySessionId(sessionId);
         if (optionalGameSession.isEmpty()){
@@ -67,7 +66,6 @@ public class GameSessionServiceImpl implements GameSessionService {
     }
 
     @Override
-    @Transactional
     public GameSession createGameSession(String playerName) {
         String gameSessionId;
         Optional<GameSession> existingGameSession;
@@ -96,7 +94,6 @@ public class GameSessionServiceImpl implements GameSessionService {
 
 
     @Override
-    @Transactional
     public GameSession joinGameSession(String playerName, String sessionId) {
         GameSession gameSession = getGameSession(sessionId);
         Player newPlayer = playerService.createPlayer(playerName, gameSession, false);
@@ -105,7 +102,6 @@ public class GameSessionServiceImpl implements GameSessionService {
     }
 
     @Override
-    @Transactional
     public GameSession updateGameState(String sessionId, StateType gameState) {
         GameSession gameSession = getGameSession(sessionId);
         gameSession.setGameState(gameState);
