@@ -5,7 +5,7 @@ import com.isitcake.game.entity.Player;
 import com.isitcake.game.dto.response.GameSessionResponseDto;
 import com.isitcake.game.type.StateType;
 import com.isitcake.game.mapper.GameSessionMapper;
-import com.isitcake.game.repositorie.GameSessionRepository;
+import com.isitcake.game.repository.GameSessionRepository;
 import com.isitcake.game.service.GameSessionService;
 import com.isitcake.game.service.PlayerService;
 import com.isitcake.game.util.SessionIdGenerator;

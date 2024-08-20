@@ -1,4 +1,4 @@
-package com.isitcake.game.repositorie;
+package com.isitcake.game.repository;
 
 import com.isitcake.game.entity.GameSession;
 

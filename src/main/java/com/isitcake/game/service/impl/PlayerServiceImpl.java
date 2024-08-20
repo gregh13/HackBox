@@ -4,7 +4,7 @@ import com.isitcake.game.dto.response.PlayerResponseDto;
 import com.isitcake.game.entity.GameSession;
 import com.isitcake.game.entity.Player;
 import com.isitcake.game.mapper.PlayerMapper;
-import com.isitcake.game.repositorie.PlayerRepository;
+import com.isitcake.game.repository.PlayerRepository;
 import com.isitcake.game.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
