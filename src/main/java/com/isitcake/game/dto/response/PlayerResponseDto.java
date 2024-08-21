@@ -14,4 +14,6 @@ public class PlayerResponseDto {
     private Integer score;
     private String choice;
     private Double timeTaken;
+    private String questionId;
+    private Boolean submitted;
 }

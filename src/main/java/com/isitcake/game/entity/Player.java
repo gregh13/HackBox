@@ -32,6 +32,12 @@ public class Player {
     @Column(name="time_taken")
     private Double timeTaken = 0.0;
 
+    @Column(name="question_id")
+    private String questionId = "";
+
+    @Column(name="submitted")
+    private Boolean submitted = false;
+
     @ManyToOne
     @JoinColumn(name = "game_session_id")
     @JsonBackReference
