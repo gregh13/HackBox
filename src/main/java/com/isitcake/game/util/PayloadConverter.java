@@ -1,7 +1,7 @@
 package com.isitcake.game.util;
 
-import com.isitcake.game.entities.payloads.SetupQuestionActionPayload;
-import com.isitcake.game.entities.payloads.SetupQuestionResponsePayload;
+import com.isitcake.game.dto.payload.SetupQuestionActionPayload;
+import com.isitcake.game.dto.payload.SetupQuestionResponsePayload;
 
 public class PayloadConverter {
     public static SetupQuestionResponsePayload toResponsePayload(SetupQuestionActionPayload setupQuestionActionPayload){
