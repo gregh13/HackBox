@@ -1,7 +1,7 @@
 package com.isitcake.game.dto.payload;
 
-import com.isitcake.game.entities.dtos.PlayerDto;
+import com.isitcake.game.dto.response.PlayerResponseDto;
 
 import java.util.List;
 
-public record TransferHostResponsePayload(List<PlayerDto> players) { }
+public record TransferHostResponsePayload(List<PlayerResponseDto> players) { }

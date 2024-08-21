@@ -6,4 +6,6 @@ public record SetupQuestionResponsePayload(
         String questionType,
         String questionText,
         List<String> choices,
-        Integer timer) { }
+        Integer timer,
+        String questionId
+) { }
