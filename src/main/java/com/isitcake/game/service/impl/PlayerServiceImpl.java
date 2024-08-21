@@ -47,10 +47,8 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public Player updatePlayer(String playerName, List<Player> gameSessionPlayers, String choice, Double timeTaken) {
-        Optional<Player> playerOpt = gameSessionPlayers.stream()
-                .filter(p -> p.getName().equals(playerName))
-                .findFirst();
+    public PlayerResponseDto updatePlayerAnswer(String sessionId, String playerName, String choice, Double timeTaken, String questionId) {
+        Optional<Player> playerOpt = playerRepository.findByNameAndSessionId(playerName, sessionId);
 
         if (playerOpt.isEmpty()) {
             String message = "Player '" + playerName + "' could not be found";
@@ -60,7 +58,9 @@ public class PlayerServiceImpl implements PlayerService {
         Player player = playerOpt.get();
         player.setChoice(choice);
         player.setTimeTaken(timeTaken);
-        return playerRepository.saveAndFlush(player);
+        player.setQuestionId(questionId);
+        player.setSubmitted(true);
+        return getPlayerDto(playerRepository.saveAndFlush(player));
     }
 
     @Override
@@ -79,5 +79,48 @@ public class PlayerServiceImpl implements PlayerService {
             players = new ArrayList<Player>();
         }
         return playerMapper.entitiesToDtos(players);
+    }
+
+    @Override
+    public List<Player> resetPlayerAnswers(List<Player> players, String questionId) {
+        for (Player player : players) {
+            player.setChoice("");
+            player.setTimeTaken(-1.0);
+            player.setQuestionId(questionId);
+            player.setSubmitted(false);
+        }
+        return playerRepository.saveAllAndFlush(players);
+    }
+
+    @Transactional
+    @Override
+    public List<Player> transferHost(String sessionId, String playerName) {
+        // Fetch all players in the session
+        List<Player> players = playerRepository.findAllBySessionId(sessionId);
+
+        // Find the current host and the new host using streams
+        Player oldHostPlayer = players.stream()
+                .filter(Player::getSessionHost)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Old host player not found!"));
+
+        Player newHostPlayer = players.stream()
+                .filter(player -> player.getName().equals(playerName))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("New host player not found!"));
+
+        // Update host flags
+        oldHostPlayer.setSessionHost(false);
+        newHostPlayer.setSessionHost(true);
+
+        // Save both updated players and return the mapped DTOs
+        return playerRepository.saveAllAndFlush(players);
+    }
+
+    @Override
+    public List<Player> findActivePlayers(List<Player> players, String questionId) {
+         return players.stream()
+                 .filter(p -> p.getQuestionId().equals(questionId) || p.getQuestionId().isEmpty())
+                 .toList();
     }
 }

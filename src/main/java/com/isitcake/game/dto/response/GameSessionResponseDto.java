@@ -15,5 +15,7 @@ public class GameSessionResponseDto {
     private String gameState;
     private Boolean active;
     private Timestamp dateCreated;
+    private String questionId;
+    private Integer numPlayersNotAnswered;
     private List<PlayerResponseDto> players;
 }

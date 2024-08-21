@@ -12,7 +12,8 @@ public enum EventType {
     SUBMIT_ANSWER("submitAnswer"),
     PLAYER_JOINED("playerJoined"),
     SETUP_QUESTION("setupQuestion"),
-    TRANSITION_STATE("transitionState");
+    TRANSITION_STATE("transitionState"),
+    TRANSFER_HOST("transferHost");
 
     private final String value;
 
