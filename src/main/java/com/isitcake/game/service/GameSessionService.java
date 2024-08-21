@@ -19,5 +19,4 @@ public interface GameSessionService {
 
     GameSession joinGameSession(String playerName, String sessionId);
 
-    void removeStaleGames();
 }
