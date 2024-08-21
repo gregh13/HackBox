@@ -31,6 +31,12 @@ public class GameSession {
     @Column(name="date_created")
     private Timestamp dateCreated;
 
+    @Column(name="question_id")
+    private String questionId;
+
+    @Column(name="num_players_not_answered")
+    private Integer numPlayersNotAnswered;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     @Column(name="players")
