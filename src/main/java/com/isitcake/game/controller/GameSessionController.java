@@ -23,7 +23,7 @@ public class GameSessionController {
     public ResponseEntity<?> getGameSession(@PathVariable String sessionId) {
         System.out.printf("Retrieving game session '%s'%n", sessionId);
 
-        GameSessionResponseDto gameSessionResponseDto = gameSessionService.getGameSessionDto(gameSessionService.getGameSession(sessionId));
+        GameSessionResponseDto gameSessionResponseDto = gameSessionService.getRequestGameSession(sessionId);
         return new ResponseEntity<>(gameSessionResponseDto, HttpStatus.OK);
     }
 
@@ -32,7 +32,7 @@ public class GameSessionController {
         String playerName = payload.get("playerName");
         System.out.println("Game created by: " + playerName);
 
-        GameSessionResponseDto gameSessionResponseDto = gameSessionService.getGameSessionDto(gameSessionService.createGameSession(playerName));
+        GameSessionResponseDto gameSessionResponseDto = gameSessionService.createGameSession(playerName);
         return new ResponseEntity<>(gameSessionResponseDto, HttpStatus.OK);
     }
 
@@ -42,7 +42,7 @@ public class GameSessionController {
         String sessionId = payload.get("sessionId");
         System.out.printf("Player '%s' wants to join game session '%s'%n", playerName, sessionId);
 
-        GameSessionResponseDto gameSessionResponseDto = gameSessionService.getGameSessionDto(gameSessionService.joinGameSession(playerName, sessionId));
+        GameSessionResponseDto gameSessionResponseDto = gameSessionService.joinGameSession(playerName, sessionId);
         return new ResponseEntity<>(gameSessionResponseDto, HttpStatus.OK);
     }
 }
