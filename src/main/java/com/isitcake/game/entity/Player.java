@@ -35,7 +35,6 @@ public class Player {
     @ManyToOne
     @JoinColumn(name = "game_session_id")
     @JsonBackReference
-    @Column(name="game_session")
     private GameSession gameSession;
 
     @Override
