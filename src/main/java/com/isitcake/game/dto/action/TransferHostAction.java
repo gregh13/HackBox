@@ -1,9 +1,9 @@
-package com.isitcake.game.entities.actions;
+package com.isitcake.game.dto.action;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.isitcake.game.entities.payloads.TransferHostActionPayload;
-import com.isitcake.game.enums.EventType;
+import com.isitcake.game.dto.payload.TransferHostActionPayload;
+import com.isitcake.game.type.EventType;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 

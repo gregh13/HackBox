@@ -1,4 +1,4 @@
-package com.isitcake.game.entities.payloads;
+package com.isitcake.game.dto.payload;
 
 import com.isitcake.game.entities.dtos.PlayerDto;
 
