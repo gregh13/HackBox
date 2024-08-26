@@ -39,7 +39,6 @@ public class Player {
     private Boolean submitted = false;
 
     @ManyToOne
-    @JoinColumn(name = "game_session_id")
     @JsonBackReference
     private GameSession gameSession;
 

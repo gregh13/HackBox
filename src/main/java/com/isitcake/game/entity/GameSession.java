@@ -39,6 +39,7 @@ public class GameSession {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
+    @JoinColumn(name = "player_id")
     @Column(name="players")
     List<Player> players  = new ArrayList<>();
 
