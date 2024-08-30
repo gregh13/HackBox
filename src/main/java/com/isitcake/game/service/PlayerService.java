@@ -9,6 +9,10 @@ import java.util.List;
 public interface PlayerService {
     Player createPlayer(String playerName, GameSession gameSession, Boolean isHost);
 
+    Player getPlayer(String playerName, String sessionId);
+
+    List<Player> getPlayers(String sessionId);
+
     PlayerResponseDto updatePlayerAnswer(String sessionId, String playerName, String choice, Double timeTaken, String questionId);
 
     PlayerResponseDto getPlayerDto(Player player);
@@ -18,6 +22,8 @@ public interface PlayerService {
 
     List<Player> transferHost(String sessionId, String playerName);
 
-    List<Player> findActivePlayers(List<Player> players, String questionId);
+    List<Player> getActivePlayersAndDeleteInactive(List<Player> players, String questionId);
+
+    void removePlayer(String playerName, String sessionId);
 
 }
