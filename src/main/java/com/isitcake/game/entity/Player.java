@@ -38,7 +38,8 @@ public class Player {
     @Column(name="submitted")
     private Boolean submitted = false;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
+//    cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH}
+    @ManyToOne()
     @JoinColumn(name = "game_session_id")
     @JsonBackReference
     private GameSession gameSession;
