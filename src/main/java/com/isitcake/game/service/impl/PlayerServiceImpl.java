@@ -30,7 +30,8 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public Player createPlayer(String playerName, GameSession gameSession, Boolean isHost) {
-        for (Player player : gameSession.getPlayers() ) {
+        List<Player> players = getPlayers(gameSession.getSessionId());
+        for (Player player : players ) {
             if (player.getName().equals(playerName)) {
                 String message = "The player name already exists in the game session and cannot be used again. Please try a new name to join the session.";
                 throw new PlayerNameTakenException(message);
@@ -47,7 +48,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public PlayerResponseDto updatePlayerAnswer(String sessionId, String playerName, String choice, Double timeTaken, String questionId) {
+    public Player getPlayer(String playerName, String sessionId) {
         Optional<Player> playerOpt = playerRepository.findByNameAndSessionId(playerName, sessionId);
 
         if (playerOpt.isEmpty()) {
@@ -55,7 +56,17 @@ public class PlayerServiceImpl implements PlayerService {
             throw new PlayerNotFoundException(message);
         }
 
-        Player player = playerOpt.get();
+        return playerOpt.get();
+    }
+
+    @Override
+    public List<Player> getPlayers(String sessionId) {
+        return playerRepository.findAllBySessionId(sessionId);
+    }
+
+    @Override
+    public PlayerResponseDto updatePlayerAnswer(String sessionId, String playerName, String choice, Double timeTaken, String questionId) {
+        Player player = getPlayer(playerName, sessionId);
         player.setChoice(choice);
         player.setTimeTaken(timeTaken);
         player.setQuestionId(questionId);
@@ -118,9 +129,23 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public List<Player> findActivePlayers(List<Player> players, String questionId) {
-         return players.stream()
-                 .filter(p -> p.getQuestionId().equals(questionId) || p.getQuestionId().isEmpty())
-                 .toList();
+    public List<Player> getActivePlayersAndDeleteInactive(List<Player> players, String questionId) {
+        List<Player> remainingPlayers = new ArrayList<Player>();
+
+        for (Player p : players) {
+            if (p.getQuestionId().equals(questionId) || p.getQuestionId().isEmpty() || p.getSessionHost()) {
+                remainingPlayers.add(p);
+            } else {
+                playerRepository.delete(p);
+            }
+        }
+
+        return remainingPlayers;
+    }
+
+    @Override
+    public void removePlayer(String playerName, String sessionId) {
+        Player playerToRemove = getPlayer(playerName, sessionId);
+        playerRepository.delete(playerToRemove);
     }
 }
