@@ -16,7 +16,7 @@ import java.util.Optional;
 public interface GameSessionRepository extends JpaRepository<GameSession, Long> {
     Optional<GameSession> findBySessionId(String sessionId);
 
-    @Query("SELECT gs FROM GameSession gs JOIN FETCH gs.players WHERE gs.session_id = :sessionId")
+    @Query("SELECT gs FROM GameSession gs JOIN FETCH gs.players WHERE gs.sessionId = :sessionId")
     Optional<GameSession> findBySessionIdFetchPlayers(String sessionId);
 
     @Query("SELECT gs FROM GameSession gs WHERE gs.active = true")
