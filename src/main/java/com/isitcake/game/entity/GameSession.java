@@ -1,6 +1,7 @@
 package com.isitcake.game.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.isitcake.game.exception.NullEntityException;
 import com.isitcake.game.type.StateType;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -37,7 +38,7 @@ public class GameSession {
     @Column(name="num_players_not_answered")
     private Integer numPlayersNotAnswered;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "gameSession")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "gameSession")
     @JsonManagedReference
     @Column(name="players")
     List<Player> players  = new ArrayList<>();
@@ -51,5 +52,12 @@ public class GameSession {
                 " | active=" + active +
                 " | players=" + players +
                 " }";
+    }
+
+    public boolean addPlayer(Player player) {
+        if (player == null) {
+            throw new NullEntityException("Can't add null player to GameSession players");
+        }
+        return this.players.add(player);
     }
 }
