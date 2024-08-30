@@ -39,7 +39,7 @@ public class WebSocketController {
         System.out.println("Player joined payload: " + requestPayload);
         System.out.println("SessionId: " + sessionId);
 
-        List<PlayerResponseDto> playerResponseDtos = gameSessionService.getCurrentPlayers(sessionId);
+        List<PlayerResponseDto> playerResponseDtos = playerService.getPlayerDtos(playerService.getPlayers(sessionId));
         PlayerJoinedResponsePayload responsePayload = new PlayerJoinedResponsePayload((playerResponseDtos));
         WebSocketMessage<PlayerJoinedResponsePayload> message = new WebSocketMessage<>(sessionId, EventType.PLAYER_JOINED.getValue(), responsePayload);
         this.template.convertAndSend("/topic/game-session", message);

@@ -43,6 +43,7 @@ public class GameSessionController {
         System.out.printf("Player '%s' wants to join game session '%s'%n", playerName, sessionId);
 
         GameSessionResponseDto gameSessionResponseDto = gameSessionService.joinGameSession(playerName, sessionId);
+        System.out.println("GameSessionDto: " + gameSessionResponseDto);
         return new ResponseEntity<>(gameSessionResponseDto, HttpStatus.OK);
     }
 }
