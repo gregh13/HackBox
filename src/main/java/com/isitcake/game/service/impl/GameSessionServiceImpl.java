@@ -45,6 +45,16 @@ public class GameSessionServiceImpl implements GameSessionService {
     }
 
     @Override
+    public GameSession getGameSessionWithPlayers(String sessionId) {
+        Optional<GameSession> optionalGameSession = gameSessionRepository.findBySessionIdFetchPlayers(sessionId);
+        if (optionalGameSession.isEmpty()) {
+            String message = "Could not find game session with id: " + sessionId;
+            throw new GameSessionNotFoundException(message);
+        }
+        return optionalGameSession.get();
+    }
+
+    @Override
     public GameSessionResponseDto getGameSessionDto(GameSession gameSession) {
         if (gameSession == null) {
             String message = "Game session is null, cannot create gameSessionDto";
@@ -56,12 +66,6 @@ public class GameSessionServiceImpl implements GameSessionService {
     @Override
     public GameSessionResponseDto getRequestGameSession(String sessionId) {
         return getGameSessionDto(getGameSession(sessionId));
-    }
-
-    @Override
-    public List<PlayerResponseDto> getCurrentPlayers(String sessionId) {
-        GameSession gameSession = getGameSession(sessionId);
-        return playerService.getPlayerDtos(gameSession.getPlayers());
     }
 
     @Override
@@ -85,7 +89,7 @@ public class GameSessionServiceImpl implements GameSessionService {
 
         // Create the host player and add to GameSession players
         Player playerOne = playerService.createPlayer(playerName, gameSession, true);
-        List<Player> players = gameSession.getPlayers();
+        List<Player> players = new ArrayList<>();
         players.add(playerOne);
         gameSession.setPlayers(players);
         return getGameSessionDto(gameSessionRepository.saveAndFlush(gameSession));
@@ -96,7 +100,9 @@ public class GameSessionServiceImpl implements GameSessionService {
     public GameSessionResponseDto joinGameSession(String playerName, String sessionId) {
         GameSession gameSession = getGameSession(sessionId);
         Player newPlayer = playerService.createPlayer(playerName, gameSession, false);
-        gameSession.getPlayers().add(newPlayer);
+        System.out.println("Attempting to add player to lazy loaded players");
+        Boolean added = gameSession.addPlayer(newPlayer);
+        System.out.println("Added player to GameSession: " + added);
         return getGameSessionDto(gameSessionRepository.saveAndFlush(gameSession));
     }
 
@@ -104,32 +110,31 @@ public class GameSessionServiceImpl implements GameSessionService {
     public GameSessionResponseDto transferHost(String sessionId, String playerName) {
         GameSession gameSession = getGameSession(sessionId);
         List<Player> players = playerService.transferHost(sessionId, playerName);
+        System.out.println("Attempting to set players to lazy loaded GameSession");
         gameSession.setPlayers(players);
         return getGameSessionDto(gameSessionRepository.saveAndFlush(gameSession));
     }
 
     @Override
     public GameSessionResponseDto transitionToSetup(String sessionId, StateType gameState) {
-        GameSession gameSession = getGameSession(sessionId);
+        GameSession gameSession = getGameSessionWithPlayers(sessionId);
         gameSession.setGameState(gameState);
 
-        List<Player> players = gameSession.getPlayers();
-        players = playerService.findActivePlayers(players, gameSession.getQuestionId());
-        gameSession.setPlayers(players);
-
+        List<Player> remainingPlayers = playerService.getActivePlayersAndDeleteInactive(gameSession.getPlayers(), gameSession.getQuestionId());
+        gameSession.setPlayers(remainingPlayers);
         return getGameSessionDto(gameSessionRepository.saveAndFlush(gameSession));
     }
 
     @Override
     public GameSessionResponseDto transitionToResults(String sessionId, StateType gameState) {
-        GameSession gameSession = getGameSession(sessionId);
+        GameSession gameSession = getGameSessionWithPlayers(sessionId);
         gameSession.setGameState(gameState);
         return getGameSessionDto(gameSessionRepository.saveAndFlush(gameSession));
     }
 
     @Override
     public GameSessionResponseDto transitionToQuestion(String sessionId, StateType gameState) {
-        GameSession gameSession = getGameSession(sessionId);
+        GameSession gameSession = getGameSessionWithPlayers(sessionId);
         gameSession.setGameState(gameState);
 
         String questionId = QuestionIdGenerator.generateQuestionId();
