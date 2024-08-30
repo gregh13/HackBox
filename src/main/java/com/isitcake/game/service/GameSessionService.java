@@ -12,11 +12,12 @@ import java.util.List;
 public interface GameSessionService {
 
     GameSession getGameSession(String sessionId);
+
+    GameSession getGameSessionWithPlayers(String sessionId);
+
     GameSessionResponseDto getGameSessionDto(GameSession gameSession);
 
     GameSessionResponseDto getRequestGameSession(String sessionId);
-
-    List<PlayerResponseDto> getCurrentPlayers(String sessionId);
 
     GameSessionResponseDto createGameSession(String playerName);
 
